@@ -79,7 +79,20 @@ require("mini.bracketed").setup()
 require("mini.comment").setup()
 require("mini.move").setup()
 require("mini.surround").setup()
-require("mini.diff").setup()
+require("mini.diff").setup({
+
+	view = {
+		style = "sign",
+		signs = {
+			add          = "┃",
+			change       = "┃",
+			delete       = "_",
+			topdelete    = "‾",
+			changedelete = "~",
+			untracked    = "┆",
+		},
+	}
+})
 
 require("mini.ai").setup({
 	n_lines = 500,
