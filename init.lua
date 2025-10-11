@@ -1,8 +1,9 @@
 -- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
 
--- {{{ Plugin Init and Config
+-- Plugin Init and Config {{{
 
--- Plugin Declaration {{{  
+-- Plugin Declaration {{{
+vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
 vim.pack.add({
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
@@ -10,16 +11,19 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-mini/mini.nvim" },
 	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/saghen/blink.cmp" },
 	{ src = "https://github.com/folke/lazy.nvim" },
 	{ src = "https://github.com/folke/snacks.nvim" },
 	{ src = "https://github.com/folke/lazydev.nvim" },
-	{ src = "https://github.com/folke/which-key.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
-}, { load = false, confirm = false })
+	{ src = "https://github.com/stevearc/conform.nvim" },
+	{ src = "https://github.com/chrisgrieser/nvim-origami" },
+}, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
-vim.cmd("colorscheme catppuccin-macchiato")
 require("blink.cmp").setup()
+
+
 
 -- nvim-tmux-navigation {{{
 require("nvim-tmux-navigation").setup({
@@ -249,6 +253,7 @@ vim.diagnostic.config({
 
 -- }}} End: Plugin Init and Config
 
+---------------------------------------------------------------------------------------------------
 
 -- {{{ Configs
 
