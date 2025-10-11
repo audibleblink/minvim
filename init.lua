@@ -14,10 +14,30 @@ vim.pack.add({
 	{ src = "https://github.com/folke/lazy.nvim" },
 	{ src = "https://github.com/folke/snacks.nvim" },
 	{ src = "https://github.com/folke/lazydev.nvim" },
+	{ src = "https://github.com/folke/which-key.nvim" },
+	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 }, { load = false, confirm = false })
 -- }}} End: Plugin Declaration
 vim.cmd("colorscheme catppuccin-macchiato")
 require("blink.cmp").setup()
+
+-- nvim-tmux-navigation {{{
+require("nvim-tmux-navigation").setup({
+	disable_when_zoomed = false,
+	keybindings = {
+		left = "<C-h>",
+		down = "<C-j>",
+		up = "<C-k>",
+		right = "<C-l>",
+		last_active = "<C-\\>",
+		next = "<C-Space>",
+	},
+})
+-- }}}
+
+-- WhichKey {{{
+require("which-key").setup({ preset = "helix" })
+-- }}}
 
 -- lazydev.nvim {{{
 require("lazydev").setup({
@@ -38,6 +58,7 @@ require("snacks").setup({
 	dashboard = { enabled = true },
 	explorer = { enabled = true },
 	input = { enabled = true },
+	notifier = { enabled = true },
 })
 
 vim.keymap.set("n", "<C-b>", function() Snacks.picker.buffers({ layout = "vscode" }) end, { desc = "Snacks: Buffers" })
