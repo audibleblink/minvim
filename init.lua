@@ -297,29 +297,25 @@ vim.api.nvim_create_autocmd("FileType", {
 -- }}}
 
 -- {{{ LSP and Completion
-require("mason").setup()
-
-local lsps = {
-	"basedpyright",
-	"denols",
-	"gopls",
-	"lua_ls",
-	"markdown_oxide",
-	"ruff",
-	"rust_analyzer",
-	"tinymist",
-	"yamlls",
-	"zls",
-}
-
-vim.lsp.enable(lsps)
--- require("mason.api.command").MasonInstall(lsps)
-
+require("mason").setup({ max_concurrent_installers = 8 })
+require("mason-lspconfig").setup({
+	ensure_installed = {
+		"basedpyright",
+		"denols",
+		"gopls",
+		"lua_ls",
+		"markdown_oxide",
+		"ruff",
+		"rust_analyzer",
+		"tinymist",
+		"yamlls",
+		"zls",
+	},
+})
 -- Register completion capabilities universally
 vim.lsp.config("*", {
-	capabilities = require('blink.cmp').get_lsp_capabilities()
+	capabilities = require("blink.cmp").get_lsp_capabilities(),
 })
-
 local custom = {
 	ruff = {
 		settings = {
@@ -328,7 +324,6 @@ local custom = {
 			format = { preview = true },
 		},
 	},
-
 	basedpyright = {
 		settings = {
 			basedpyright = {
@@ -341,16 +336,14 @@ local custom = {
 			},
 		},
 	},
-
 	-- vim.lsp.config (vim.tbl_deep_extend) doesn't merge lists, so we do it here
-	denols = { filetypes = vim.tbl_extend("keep", { "json", "jsonc" }, vim.lsp.config.denols.filetypes) },
+	denols = {
+		filetypes = vim.tbl_extend("keep", { "json", "jsonc" }, vim.lsp.config.denols.filetypes),
+	},
 }
-
 for server, config in pairs(custom) do
 	vim.lsp.config(server, config)
 end
-
-
 local x = vim.diagnostic.severity
 vim.diagnostic.config({
 	update_in_insert = false,
