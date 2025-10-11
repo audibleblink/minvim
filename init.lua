@@ -19,9 +19,24 @@ vim.pack.add({
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/chrisgrieser/nvim-origami" },
+	{ src = "https://github.com/f-person/auto-dark-mode.nvim" },
 }, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
 require("blink.cmp").setup()
+
+-- auto-dark-mode {{{
+require("auto-dark-mode").setup({
+	set_dark_mode = function()
+		vim.api.nvim_set_option_value("background", "dark", {})
+		vim.cmd.colorscheme("catppuccin-macchiato")
+	end,
+	set_light_mode = function()
+		vim.api.nvim_set_option_value("background", "light", {})
+	end,
+	update_interval = 500,
+	fallback = "dark",
+})
+-- }}}
 
 -- origami.nvim {{{
 -- require("origami").setup({
