@@ -388,6 +388,22 @@ vim.api.nvim_create_autocmd("WinEnter", {
 		end
 	end,
 })
+
+vim.api.nvim_create_user_command("Commit", function()
+	-- This causes git to create COMMIT_EDITMSG but not complete the commit
+	vim.fn.system("GIT_EDITOR=true git commit -v")
+	local git_dir = vim.fn.system("git rev-parse --git-dir"):gsub("\n", "")
+	vim.cmd("tabedit! " .. git_dir .. "/COMMIT_EDITMSG")
+
+	vim.api.nvim_create_autocmd("BufWritePost", {
+		desc = "Execute git commit",
+		pattern = "COMMIT_EDITMSG",
+		once = true,
+		callback = function()
+			vim.fn.system("git commit -F " .. vim.fn.expand("%:p"))
+		end,
+	})
+end, {})
 -- }}} End: AutoCommands
 
 -- {{{ Neovim Mappings
