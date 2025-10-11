@@ -1,55 +1,8 @@
--- vim: foldmarker={{{,}}} foldlevel=0 foldmethod=marker
+-- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
 
--- {{{ Options
-local map = vim.keymap.set
-local opt = vim.opt
-local g = vim.g
-local o = vim.o
+-- {{{ Plugin Init and Config
 
-g.mapleader = " "
-
-opt.autoread = true
-opt.colorcolumn = "100"
-opt.fillchars = { eob = " " }
-opt.guifont = "CodeliaLigatures Nerd Font"
-opt.scrolloff = 4
-opt.shortmess:append("sI")
-opt.swapfile = false
-opt.whichwrap:append("<>[]hl")
-
-o.clipboard = "unnamedplus"
-o.cursorline = true
-o.cursorlineopt = "both"
-o.foldlevel = 99
-o.foldlevelstart = 99
-o.ignorecase = true
-o.laststatus = 3
-o.mouse = "a"
-o.number = true
-o.relativenumber = true
-o.showmode = false
-o.signcolumn = "auto:2"
-o.smartcase = true
-o.splitbelow = true
-o.splitright = true
-o.swapfile = false
-o.tabstop = 4
-o.termguicolors = true
-o.timeoutlen = 500
-o.undofile = true
-o.updatetime = 500 -- used by gitsigns/CursorHold
-o.winborder = "rounded"
-o.wrap = false
--- Numbers
-o.number = true
-o.numberwidth = 2
-
--- add binaries installed by mise and mason.nvim to PATH
-vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
-vim.env.PATH = vim.env.PATH .. ":" .. vim.fn.stdpath("data") .. "/mason/bin"
--- }}} End Options
-
--- {{{ Plugin Declaration
+-- Plugin Declaration {{{  
 vim.pack.add({
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
@@ -61,18 +14,23 @@ vim.pack.add({
 	{ src = "https://github.com/folke/lazy.nvim" },
 	{ src = "https://github.com/folke/snacks.nvim" },
 	{ src = "https://github.com/folke/lazydev.nvim" },
-})
+}, { load = false, confirm = false })
 -- }}} End: Plugin Declaration
-
--- {{{ Plugin Init and Config
 vim.cmd("colorscheme catppuccin-macchiato")
-require("oil").setup()
 require("blink.cmp").setup()
+
+-- lazydev.nvim {{{
 require("lazydev").setup({
 	library = {
 		{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
 	},
 })
+--}}}
+
+-- oil.nvim {{{
+require("oil").setup()
+vim.keymap.set("n", "<leader>o", ":Oil<CR>")
+-- }}}
 
 -- snacks.nvim {{{
 require("snacks").setup({
@@ -82,19 +40,19 @@ require("snacks").setup({
 	input = { enabled = true },
 })
 
--- map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find Files" })
-map("n", "<leader>ff", Snacks.picker.smart, { desc = "Snacks Files" })
-map("n", "<leader>fr", Snacks.picker.recent, { desc = "Snacks Recent" })
-map("n", "<leader>fs", Snacks.picker.git_status, { desc = "Snacks Git Status" })
-map("n", "<leader>fw", Snacks.picker.grep, { desc = "Snacks Grep" })
-map("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks Resume" })
-map("n", "<C-n>", Snacks.picker.explorer, { desc = "Snacks Explorer" })
-map("n", "<C-b>", Snacks.picker.buffers, { desc = "Snacks Explorer" })
+vim.keymap.set("n", "<C-b>", function() Snacks.picker.buffers({ layout = "vscode" }) end, { desc = "Snacks: Buffers" })
+vim.keymap.set("n", "<C-n>", function() Snacks.picker.explorer({ layout = "right" }) end, { desc = "Snacks: Explorer" })
+vim.keymap.set("n", "<leader>fp", function() Snacks.picker() end, { desc = "Snacks: Pickers" })
+vim.keymap.set("n", "<leader>ff", function() Snacks.picker.smart() end, { desc = "Snacks: Files" })
+vim.keymap.set("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Snacks: Recent" })
+vim.keymap.set("n", "<leader>fs", function() Snacks.picker.git_status() end, { desc = "Snacks: Git Status" })
+vim.keymap.set("n", "<leader>fw", function() Snacks.picker.grep() end, { desc = "Snacks: Grep" })
+vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
+vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
 
 -- mini.nvim {{{
 require("mini.icons").setup()
--- require("mini.pick").setup()
 require("mini.align").setup()
 require("mini.bracketed").setup()
 require("mini.comment").setup()
@@ -189,14 +147,6 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- }}}
 
--- }}} End: Plugin Init and Config
-
--- {{{ Plugin Mappings
--- vim.keymap.set("n", "<leader>ff", ":Pick files<CR>")
-vim.keymap.set("n", "<leader>fh", ":Pick help<CR>")
-vim.keymap.set("n", "<leader>o", ":Oil<CR>")
--- }}} End: Plugin Mappings
-
 -- {{{ LSP and Completion
 require("mason").setup()
 
@@ -262,6 +212,58 @@ vim.diagnostic.config({
 	float = { border = "single" },
 })
 -- }}} End: LSP and Completion
+
+-- }}} End: Plugin Init and Config
+
+
+-- {{{ Configs
+
+-- {{{ Options
+local opt = vim.opt
+local o = vim.o
+
+vim.g.mapleader = " "
+
+opt.autoread = true
+opt.colorcolumn = "100"
+opt.fillchars = { eob = " " }
+opt.guifont = "CodeliaLigatures Nerd Font"
+opt.scrolloff = 4
+opt.shortmess:append("sI")
+opt.swapfile = false
+opt.whichwrap:append("<>[]hl")
+
+o.clipboard = "unnamedplus"
+o.cursorline = true
+o.cursorlineopt = "both"
+o.foldlevel = 99
+o.foldlevelstart = 99
+o.ignorecase = true
+o.laststatus = 3
+o.mouse = "a"
+o.number = true
+o.relativenumber = true
+o.showmode = false
+o.signcolumn = "auto:2"
+o.smartcase = true
+o.splitbelow = true
+o.splitright = true
+o.swapfile = false
+o.tabstop = 4
+o.termguicolors = true
+o.timeoutlen = 500
+o.undofile = true
+o.updatetime = 500 -- used by gitsigns/CursorHold
+o.winborder = "rounded"
+o.wrap = false
+-- Numbers
+o.number = true
+o.numberwidth = 2
+
+-- add binaries installed by mise and mason.nvim to PATH
+vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
+vim.env.PATH = vim.env.PATH .. ":" .. vim.fn.stdpath("data") .. "/mason/bin"
+-- }}} End Options
 
 -- {{{ AutoCommands
 
@@ -355,22 +357,22 @@ vim.api.nvim_create_autocmd("WinEnter", {
 -- }}} End: AutoCommands
 
 -- {{{ Neovim Mappings
-map("i", "jk", "<ESC>", { desc = "Escape insert mode" })
-map("n", "gm", vim.lsp.buf.format)
-map("n", "<leader>r", ":update<CR> :source<CR>")
-map("n", "<cr>", ":")
+vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
+vim.keymap.set("n", "gm", vim.lsp.buf.format)
+vim.keymap.set("n", "<leader>r", ":update<CR> :source<CR>")
+vim.keymap.set("n", "<cr>", ":")
 
 -- QoL
-map("n", "J", "mzJ`z", { desc = "Join w/o cursor moving" })
-map("n", "<CR>", ":", { desc = "CMD enter command mode" })
-map("n", "<leader><Tab>", "<cmd> b# <CR>", { desc = "Previous Buffer" })
-map("n", "gh", "0", { desc = "Jump: Start of line" })
-map("n", "gl", "$", { desc = "Jump: End of line" })
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Join w/o cursor moving" })
+vim.keymap.set("n", "<CR>", ":", { desc = "CMD enter command mode" })
+vim.keymap.set("n", "<leader><Tab>", "<cmd> b# <CR>", { desc = "Previous Buffer" })
+vim.keymap.set("n", "gh", "0", { desc = "Jump: Start of line" })
+vim.keymap.set("n", "gl", "$", { desc = "Jump: End of line" })
 
-map("n", "q", "", { desc = "Unassing q key" })
-map("n", "\\", "q", { desc = "Macros" })
-map("n", "qo", "<cmd>copen<CR>", { desc = "Open QuickFix" })
-map("n", "qa", function()
+vim.keymap.set("n", "q", "", { desc = "Unassing q key" })
+vim.keymap.set("n", "\\", "q", { desc = "Macros" })
+vim.keymap.set("n", "qo", "<cmd>copen<CR>", { desc = "Open QuickFix" })
+vim.keymap.set("n", "qa", function()
 	vim.fn.setqflist({ {
 		filename = vim.fn.expand("%"),
 		lnum = 1,
@@ -380,26 +382,26 @@ map("n", "qa", function()
 end, { desc = "Add current file to QuickFix" })
 
 -- Line numbers
-map("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "Toggle Line number" })
-map("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "Toggle Relative number" })
+vim.keymap.set("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "Toggle Line number" })
+vim.keymap.set("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "Toggle Relative number" })
 
 -- Window management
-map("n", "<leader>zi", "<cmd> wincmd | <CR>:wincmd _ <CR>", { desc = "Zoom Pane" })
-map("n", "<leader>zo", "<cmd> wincmd = <CR>", { desc = "Reset Zoom" })
+vim.keymap.set("n", "<leader>zi", "<cmd> wincmd | <CR>:wincmd _ <CR>", { desc = "Zoom Pane" })
+vim.keymap.set("n", "<leader>zo", "<cmd> wincmd = <CR>", { desc = "Reset Zoom" })
 
 -- Highlight Searching
-map("n", "c*", "*Ncgn", { desc = "Search and Replace 1x1" })
-map("v", "<C-r>", 'y:%s/<C-r>"//gc<left><left><left>', { desc = "Insert highlight as search string" })
+vim.keymap.set("n", "c*", "*Ncgn", { desc = "Search and Replace 1x1" })
+vim.keymap.set("v", "<C-r>", 'y:%s/<C-r>"//gc<left><left><left>', { desc = "Insert highlight as search string" })
 
 -- Resize w/ Shift + Arrow Keys
-map("n", "<S-Up>", "<cmd>resize +2<CR>")             -- Increase height
-map("n", "<S-Down>", "<cmd>resize -2<CR>")           -- Decrease height
-map("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase width
-map("n", "<S-Left>", "<cmd>vertical resize -5<CR>")  -- Decrease width
+vim.keymap.set("n", "<S-Up>", "<cmd>resize +2<CR>")             -- Increase height
+vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<CR>")           -- Decrease height
+vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase width
+vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>")  -- Decrease width
 
 -- Smart highlight cancelling
-map("n", "n", "nzzzv:set cursorcolumn hlsearch<CR>")
-map("n", "N", "Nzzzv:set cursorcolumn hlsearch<CR>")
+vim.keymap.set("n", "n", "nzzzv:set cursorcolumn hlsearch<CR>")
+vim.keymap.set("n", "N", "Nzzzv:set cursorcolumn hlsearch<CR>")
 
 vim.on_key(function(char)
 	if vim.fn.mode() == "n" then
@@ -412,34 +414,30 @@ vim.on_key(function(char)
 end, vim.api.nvim_create_namespace("auto_hlsearch"))
 ------------------------------------ Brace Match ---------------------------------------
 -- NOTE custom objects config'd in mini.ai plugin
-map("n", "mm", "%")
+vim.keymap.set("n", "mm", "%")
 -- Selects until matching pair, ex: `vm`
-map("x", "m", "%")
+vim.keymap.set("x", "m", "%")
 -- Use with operators, ex: `dm` - delete until matching pair
-map("o", "m", "%")
+vim.keymap.set("o", "m", "%")
 
 -------------------------------------- Tabline -----------------------------------------
-map("n", "]t", ":tabnext<CR>", { desc = "Next tab", silent = true })
-map("n", "[t", ":tabprevious<CR>", { desc = "Previous tab", silent = true })
-
-map("n", "<leader>tt", function()
-	require("i3tab").toggle_tabline()
-end, { desc = "Toggle [t]abs" })
+vim.keymap.set("n", "]t", ":tabnext<CR>", { desc = "Next tab", silent = true })
+vim.keymap.set("n", "[t", ":tabprevious<CR>", { desc = "Previous tab", silent = true })
 
 -------------------------------------- Terminal -----------------------------------------
 -- Terminal mode escape
 --
-map("t", "<C-g>", "<C-\\><C-N>", { desc = "Terminal Escape terminal mode" })
+vim.keymap.set("t", "<C-g>", "<C-\\><C-N>", { desc = "Terminal Escape terminal mode" })
 
 -- Terminal Navigation
 local function navigate_from_terminal(direction)
 	return "<C-\\><C-N><C-w>" .. direction
 end
 
-map("t", "<C-h>", navigate_from_terminal("h"))
-map("t", "<C-j>", navigate_from_terminal("j"))
-map("t", "<C-k>", navigate_from_terminal("k"))
-map("t", "<C-l>", navigate_from_terminal("l"))
+vim.keymap.set("t", "<C-h>", navigate_from_terminal("h"))
+vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
+vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
+vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 
 local modes = { "n", "t" }
 local function run_in_terminal(cmd, opts)
@@ -461,7 +459,7 @@ local function run_in_terminal(cmd, opts)
 end
 
 local last_cmd = ""
-map(modes, "<leader>tr", function()
+vim.keymap.set(modes, "<leader>tr", function()
 	local cmd = vim.fn.input("Command to run: ", last_cmd)
 	if cmd and cmd ~= "" then
 		last_cmd = cmd
@@ -469,7 +467,7 @@ map(modes, "<leader>tr", function()
 	end
 end, { desc = "Run user command in terminal" })
 
-map(modes, "<leader>ts", function()
+vim.keymap.set(modes, "<leader>ts", function()
 	local cmd = vim.fn.input("Command to run (vs): ", last_cmd)
 	if cmd and cmd ~= "" then
 		last_cmd = cmd
@@ -477,3 +475,5 @@ map(modes, "<leader>ts", function()
 	end
 end, { desc = "Run user command in vertical split terminal" })
 -- }}} End Mappings
+
+-- }}} End: Configs
