@@ -101,10 +101,6 @@ require("nvim-tmux-navigation").setup({
 })
 -- }}}
 
--- WhichKey {{{
-require("which-key").setup({ preset = "helix" })
--- }}}
-
 -- lazydev.nvim {{{
 require("lazydev").setup({
 	library = {
@@ -125,15 +121,38 @@ require("snacks").setup({
 	explorer = { enabled = true },
 	input = { enabled = true },
 	notifier = { enabled = true },
+	quickfile = { enabled = true },
+	scroll = {
+		animate = {
+			-- duration = { step = 50, total = 500 },
+			easing = "outSine",
+		},
+	},
+	statuscolumn = { enabled = true },
+	zen = { enabled = true },
+	-- bufdelete = { enabled = true },
 })
-
-vim.keymap.set("n", "<C-b>", function() Snacks.picker.buffers({ layout = "vscode" }) end, { desc = "Snacks: Buffers" })
-vim.keymap.set("n", "<C-n>", function() Snacks.picker.explorer({ layout = "right" }) end, { desc = "Snacks: Explorer" })
-vim.keymap.set("n", "<leader>fp", function() Snacks.picker() end, { desc = "Snacks: Pickers" })
-vim.keymap.set("n", "<leader>ff", function() Snacks.picker.smart() end, { desc = "Snacks: Files" })
-vim.keymap.set("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Snacks: Recent" })
-vim.keymap.set("n", "<leader>fs", function() Snacks.picker.git_status() end, { desc = "Snacks: Git Status" })
-vim.keymap.set("n", "<leader>fw", function() Snacks.picker.grep() end, { desc = "Snacks: Grep" })
+vim.keymap.set("n", "<C-b>", function()
+	Snacks.picker.buffers({ layout = "vscode" })
+end, { desc = "Snacks: Buffers" })
+vim.keymap.set("n", "<C-n>", function()
+	Snacks.picker.explorer({ layout = "right" })
+end, { desc = "Snacks: Explorer" })
+vim.keymap.set("n", "<leader>fp", function()
+	Snacks.picker()
+end, { desc = "Snacks: Pickers" })
+vim.keymap.set("n", "<leader>ff", function()
+	Snacks.picker.smart()
+end, { desc = "Snacks: Files" })
+vim.keymap.set("n", "<leader>fr", function()
+	Snacks.picker.recent()
+end, { desc = "Snacks: Recent" })
+vim.keymap.set("n", "<leader>fs", function()
+	Snacks.picker.git_status()
+end, { desc = "Snacks: Git Status" })
+vim.keymap.set("n", "<leader>fw", function()
+	Snacks.picker.grep()
+end, { desc = "Snacks: Grep" })
 vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
 vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
