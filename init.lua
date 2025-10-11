@@ -1,4 +1,4 @@
--- vim: ft=lua foldmarker={{{,}}} foldlevelstart=1 foldmethod=marker
+-- vim: foldmarker={{{,}}} foldlevel=0 foldmethod=marker
 
 -- {{{ Options
 local map = vim.keymap.set
@@ -58,6 +58,9 @@ vim.pack.add({
 	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/saghen/blink.cmp" },
+	{ src = "https://github.com/folke/lazy.nvim" },
+	{ src = "https://github.com/folke/snacks.nvim" },
+	{ src = "https://github.com/folke/lazydev.nvim" },
 })
 -- }}} End: Plugin Declaration
 
@@ -65,9 +68,33 @@ vim.pack.add({
 vim.cmd("colorscheme catppuccin-macchiato")
 require("oil").setup()
 require("blink.cmp").setup()
+require("lazydev").setup({
+	library = {
+		{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+	},
+})
+
+-- snacks.nvim {{{
+require("snacks").setup({
+	picker = { enabled = true },
+	dashboard = { enabled = true },
+	explorer = { enabled = true },
+	input = { enabled = true },
+})
+
+-- map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find Files" })
+map("n", "<leader>ff", Snacks.picker.smart, { desc = "Snacks Files" })
+map("n", "<leader>fr", Snacks.picker.recent, { desc = "Snacks Recent" })
+map("n", "<leader>fs", Snacks.picker.git_status, { desc = "Snacks Git Status" })
+map("n", "<leader>fw", Snacks.picker.grep, { desc = "Snacks Grep" })
+map("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks Resume" })
+map("n", "<C-n>", Snacks.picker.explorer, { desc = "Snacks Explorer" })
+map("n", "<C-b>", Snacks.picker.buffers, { desc = "Snacks Explorer" })
+-- }}}
 
 -- mini.nvim {{{
-require("mini.pick").setup()
+require("mini.icons").setup()
+-- require("mini.pick").setup()
 require("mini.align").setup()
 require("mini.bracketed").setup()
 require("mini.comment").setup()
@@ -165,28 +192,29 @@ vim.api.nvim_create_autocmd("FileType", {
 -- }}} End: Plugin Init and Config
 
 -- {{{ Plugin Mappings
-vim.keymap.set("n", "<leader>ff", ":Pick files<CR>")
+-- vim.keymap.set("n", "<leader>ff", ":Pick files<CR>")
 vim.keymap.set("n", "<leader>fh", ":Pick help<CR>")
 vim.keymap.set("n", "<leader>o", ":Oil<CR>")
 -- }}} End: Plugin Mappings
 
 -- {{{ LSP and Completion
+require("mason").setup()
+
 local lsps = {
 	"basedpyright",
-	"deno",
+	"denols",
 	"gopls",
-	"lua-language-server",
-	"markdown-oxide",
+	"lua_ls",
+	"markdown_oxide",
 	"ruff",
-	"rust-analyzer",
+	"rust_analyzer",
 	"tinymist",
-	"yaml-language-server",
+	"yamlls",
 	"zls",
 }
 
 vim.lsp.enable(lsps)
-require("mason.api.command").MasonInstall(lsps)
-require("mason").setup()
+-- require("mason.api.command").MasonInstall(lsps)
 
 -- Register completion capabilities universally
 vim.lsp.config("*", {
@@ -222,8 +250,6 @@ local custom = {
 for server, config in pairs(custom) do
 	vim.lsp.config(server, config)
 end
-
-
 
 
 local x = vim.diagnostic.severity
