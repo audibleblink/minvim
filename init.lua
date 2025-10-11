@@ -159,24 +159,58 @@ vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 
 -- mini.nvim {{{
 require("mini.icons").setup()
+require("mini.pairs").setup()
+require("mini.clue").setup({
+	triggers = {
+		{ mode = "n", keys = "<Leader>" },
+		{ mode = "x", keys = "<Leader>" },
+		-- Built-in completion
+		{ mode = "i", keys = "<C-x>" },
+		{ mode = "n", keys = "g" },
+		{ mode = "x", keys = "g" },
+		{ mode = "n", keys = "]" },
+		{ mode = "n", keys = "[" },
+		{ mode = "x", keys = "]" },
+		{ mode = "x", keys = "[" },
+		{ mode = "n", keys = "'" },
+		{ mode = "n", keys = "`" },
+		{ mode = "x", keys = "'" },
+		{ mode = "x", keys = "`" },
+		-- Registers
+		{ mode = "n", keys = '"' },
+		{ mode = "x", keys = '"' },
+		{ mode = "i", keys = "<C-r>" },
+		{ mode = "c", keys = "<C-r>" },
+		-- Window commands
+		{ mode = "n", keys = "<C-w>" },
+		-- `z` key
+		{ mode = "n", keys = "z" },
+		{ mode = "x", keys = "z" },
+	},
+	clues = {
+		-- Enhance this by adding descriptions for <Leader> mapping groups
+		require("mini.clue").gen_clues.builtin_completion(),
+		require("mini.clue").gen_clues.g(),
+		require("mini.clue").gen_clues.marks(),
+		require("mini.clue").gen_clues.registers(),
+		require("mini.clue").gen_clues.windows(),
+		require("mini.clue").gen_clues.z(),
+	},
+	window = {
+		delay = 400,
+		config = { anchor = "NE", row = "auto", col = "auto" },
+	},
+})
 require("mini.align").setup()
 require("mini.bracketed").setup()
 require("mini.comment").setup()
 require("mini.move").setup()
 require("mini.surround").setup()
 require("mini.diff").setup({
-
 	view = {
 		style = "sign",
-		signs = {
-			add          = "┃",
-			change       = "┃",
-			delete       = "_",
-			topdelete    = "‾",
-			changedelete = "~",
-			untracked    = "┆",
-		},
-	}
+		signs = { add = "┃", change = "┃", delete = "_" },
+	},
 })
 
 require("mini.ai").setup({
@@ -219,7 +253,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.cmd([[highlight! link MiniIndentscopeSymbol Identifier]])
 -- }}}
 
--- {{{ TreeSitter
+-- {{{ tree-sitter
 local ts_lang = {
 	-- web dev
 	"html",
@@ -230,7 +264,6 @@ local ts_lang = {
 	"json",
 	"vue",
 	"svelte",
-
 	-- other
 	"c",
 	"go",
@@ -251,10 +284,8 @@ local ts_lang = {
 	"vimdoc",
 	"yaml",
 }
-
 require("nvim-treesitter").install(ts_lang)
 require("nvim-treesitter").setup()
-
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "Load tree-sitter for supported file types",
 	pattern = ts_lang,
@@ -263,7 +294,6 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.treesitter.start()
 	end,
 })
-
 -- }}}
 
 -- {{{ LSP and Completion
@@ -339,10 +369,9 @@ vim.diagnostic.config({
 -- {{{ Configs
 
 -- {{{ Options
+vim.cmd.colorscheme("catppuccin-macchiato")
 local opt = vim.opt
 local o = vim.o
-
-vim.g.mapleader = " "
 
 opt.autoread = true
 opt.colorcolumn = "100"
@@ -352,19 +381,18 @@ opt.scrolloff = 4
 opt.shortmess:append("sI")
 opt.swapfile = false
 opt.whichwrap:append("<>[]hl")
+opt.foldlevel = 99
+opt.foldlevelstart = 99
 
 o.clipboard = "unnamedplus"
 o.cursorline = true
 o.cursorlineopt = "both"
-o.foldlevel = 99
-o.foldlevelstart = 99
 o.ignorecase = true
 o.laststatus = 3
 o.mouse = "a"
 o.number = true
 o.relativenumber = true
 o.showmode = false
-o.signcolumn = "auto:2"
 o.smartcase = true
 o.splitbelow = true
 o.splitright = true
@@ -380,9 +408,8 @@ o.wrap = false
 o.number = true
 o.numberwidth = 2
 
--- add binaries installed by mise and mason.nvim to PATH
+-- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
-vim.env.PATH = vim.env.PATH .. ":" .. vim.fn.stdpath("data") .. "/mason/bin"
 -- }}} End Options
 
 -- {{{ AutoCommands
@@ -397,7 +424,6 @@ vim.env.PATH = vim.env.PATH .. ":" .. vim.fn.stdpath("data") .. "/mason/bin"
 -- })
 --
 
------------------------------------Auto-Commands-------------------------------------
 -- highlight yanked text for 300ms using the "Visual" highlight group
 --
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -493,17 +519,17 @@ end, {})
 -- }}} End: AutoCommands
 
 -- {{{ Neovim Mappings
+vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Join w/o cursor moving" })
 vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
-vim.keymap.set("n", "gm", vim.lsp.buf.format)
-vim.keymap.set("n", "<leader>r", ":update<CR> :source<CR>")
+vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>")
 vim.keymap.set("n", "<cr>", ":")
 
 -- QoL
 vim.keymap.set("n", "J", "mzJ`z", { desc = "Join w/o cursor moving" })
 vim.keymap.set("n", "<CR>", ":", { desc = "CMD enter command mode" })
 vim.keymap.set("n", "<leader><Tab>", "<cmd> b# <CR>", { desc = "Previous Buffer" })
-vim.keymap.set("n", "gh", "0", { desc = "Jump: Start of line" })
-vim.keymap.set("n", "gl", "$", { desc = "Jump: End of line" })
+vim.keymap.set("n", "<left>", "0", { desc = "Jump: Start of line" })
+vim.keymap.set("n", "<right>", "$", { desc = "Jump: End of line" })
 
 vim.keymap.set("n", "q", "", { desc = "Unassing q key" })
 vim.keymap.set("n", "\\", "q", { desc = "Macros" })
@@ -530,10 +556,10 @@ vim.keymap.set("n", "c*", "*Ncgn", { desc = "Search and Replace 1x1" })
 vim.keymap.set("v", "<C-r>", 'y:%s/<C-r>"//gc<left><left><left>', { desc = "Insert highlight as search string" })
 
 -- Resize w/ Shift + Arrow Keys
-vim.keymap.set("n", "<S-Up>", "<cmd>resize +2<CR>")             -- Increase height
-vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<CR>")           -- Decrease height
+vim.keymap.set("n", "<S-Up>", "<cmd>resize +2<CR>") -- Increase height
+vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<CR>") -- Decrease height
 vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase width
-vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>")  -- Decrease width
+vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>") -- Decrease width
 
 -- Smart highlight cancelling
 vim.keymap.set("n", "n", "nzzzv:set cursorcolumn hlsearch<CR>")
