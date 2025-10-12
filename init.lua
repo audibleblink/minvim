@@ -27,6 +27,20 @@ vim.pack.add({
 }, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
 
+-- auto-dark-mode {{{
+require("auto-dark-mode").setup({
+	set_dark_mode = function()
+		vim.api.nvim_set_option_value("background", "dark", {})
+		vim.cmd.colorscheme("catppuccin-macchiato")
+	end,
+	set_light_mode = function()
+		vim.api.nvim_set_option_value("background", "light", {})
+	end,
+	update_interval = 500,
+	fallback = "dark",
+})
+-- }}}
+
 -- blink.cmp {{{
 require("blink.cmp").setup({
 	completion = {
@@ -48,45 +62,6 @@ require("blink.cmp").setup({
 		},
 	},
 })
--- }}}
-
--- auto-dark-mode {{{
-require("auto-dark-mode").setup({
-	set_dark_mode = function()
-		vim.api.nvim_set_option_value("background", "dark", {})
-		vim.cmd.colorscheme("catppuccin-macchiato")
-	end,
-	set_light_mode = function()
-		vim.api.nvim_set_option_value("background", "light", {})
-	end,
-	update_interval = 500,
-	fallback = "dark",
-})
--- }}}
-
--- origami.nvim {{{
--- require("origami").setup({
--- 	useLspFoldsWithTreesitterFallback = true,
--- 	pauseFoldsOnSearch = true,
--- 	foldtext = {
--- 		enabled = true,
--- 		padding = 3,
--- 		lineCount = {
--- 			template = "-- %d lines", -- `%d` is replaced with the number of folded lines
--- 			hlgroup = "Comment",
--- 		},
--- 		diagnosticsCount = true, -- uses hlgroups and icons from `vim.diagnostic.config().signs`
--- 		gitsignsCount = true, -- requires `gitsigns.nvim`
--- 	},
--- 	autoFold = {
--- 		enabled = true,
--- 		kinds = { "comment", "imports" }, ---@type lsp.FoldingRangeKind[]
--- 	},
--- 	foldKeymaps = {
--- 		setup = true, -- modifies `h`, `l`, and `$`
--- 		hOnlyOpensOnFirstColumn = false,
--- 	},
--- })
 -- }}}
 
 -- conform.nvim {{{
@@ -111,20 +86,6 @@ vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 vim.keymap.set("n", "gm", function()
 	require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 10000 })
 end, { desc = "Format Files" })
--- }}}
-
--- nvim-tmux-navigation {{{
-require("nvim-tmux-navigation").setup({
-	disable_when_zoomed = false,
-	keybindings = {
-		left = "<C-h>",
-		down = "<C-j>",
-		up = "<C-k>",
-		right = "<C-l>",
-		last_active = "<C-\\>",
-		next = "<C-Space>",
-	},
-})
 -- }}}
 
 -- lazydev.nvim {{{
@@ -289,6 +250,7 @@ vim.cmd([[highlight! link MiniIndentscopeSymbol Identifier]])
 -- }}}
 
 -- noice.nvim {{{
+
 require("noice").setup({
 	presets = {
 		bottom_search = false, -- use a classic bottom cmdline for search
@@ -336,6 +298,51 @@ require("noice").setup({
 		},
 	},
 })
+
+-- }}}
+
+-- nvim-tmux-navigation {{{
+require("nvim-tmux-navigation").setup({
+	disable_when_zoomed = false,
+	keybindings = {
+		left = "<C-h>",
+		down = "<C-j>",
+		up = "<C-k>",
+		right = "<C-l>",
+		last_active = "<C-\\>",
+		next = "<C-Space>",
+	},
+})
+-- }}}
+
+-- oil.nvim {{{
+require("oil").setup()
+vim.keymap.set("n", "<leader>o", ":Oil<CR>")
+-- }}}
+
+-- origami.nvim {{{
+-- require("origami").setup({
+-- 	useLspFoldsWithTreesitterFallback = true,
+-- 	pauseFoldsOnSearch = true,
+-- 	foldtext = {
+-- 		enabled = true,
+-- 		padding = 3,
+-- 		lineCount = {
+-- 			template = "-- %d lines", -- `%d` is replaced with the number of folded lines
+-- 			hlgroup = "Comment",
+-- 		},
+-- 		diagnosticsCount = true, -- uses hlgroups and icons from `vim.diagnostic.config().signs`
+-- 		gitsignsCount = true, -- requires `gitsigns.nvim`
+-- 	},
+-- 	autoFold = {
+-- 		enabled = true,
+-- 		kinds = { "comment", "imports" }, ---@type lsp.FoldingRangeKind[]
+-- 	},
+-- 	foldKeymaps = {
+-- 		setup = true, -- modifies `h`, `l`, and `$`
+-- 		hOnlyOpensOnFirstColumn = false,
+-- 	},
+-- })
 -- }}}
 
 -- sidekick.nvim {{{
@@ -373,6 +380,84 @@ end, { desc = "Sidekick: Send File" })
 vim.keymap.set("x", "<leader>av", function()
 	require("sidekick.cli").send({ msg = "{selection}" })
 end, { desc = "Sidekick: Send Literal Selection" })
+-- }}}
+
+-- snacks.nvim {{{
+require("snacks").setup({
+	picker = { enabled = true },
+	dashboard = {
+		preset = {
+			header = [[
+░▀█▀░▄▀▀▄░█▀▄▀█░▄▀▀▄░█▀▀▄░█▀▀▄░▄▀▀▄░█░░░█
+░░█░░█░░█░█░▀░█░█░░█░█▄▄▀░█▄▄▀░█░░█░▀▄█▄▀
+░░▀░░░▀▀░░▀░░▒▀░░▀▀░░▀░▀▀░▀░▀▀░░▀▀░░░▀░▀░
+  ░█▀▀█░▄▀▀▄░█▀▄▀█░█▀▀░█▀▀
+  ░█░░░░█░░█░█░▀░█░█▀▀░▀▀▄
+  ░▀▀▀▀░░▀▀░░▀░░▒▀░▀▀▀░▀▀▀]],
+			keys = {
+				{ icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+				{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+				{ icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+				{ icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+				{
+					icon = " ",
+					key = "d",
+					desc = "Config",
+					action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
+				},
+				{
+					icon = " ",
+					key = "s",
+					desc = "Scratch Buffer",
+					action = ":enew | setlocal buftype=nofile bufhidden=hide noswapfile",
+				},
+				{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+			},
+			-- Used by the `header` section
+		},
+		sections = {
+			{ section = "header" },
+			{ section = "keys", gap = 1, padding = 1 },
+			-- { section = "startup" },
+		},
+	},
+	explorer = { enabled = true },
+	input = { enabled = true },
+	notifier = { enabled = true },
+	quickfile = { enabled = true },
+	scroll = {
+		animate = {
+			-- duration = { step = 50, total = 500 },
+			easing = "outSine",
+		},
+	},
+	statuscolumn = { enabled = true },
+	zen = { enabled = true },
+	-- bufdelete = { enabled = true },
+})
+vim.keymap.set("n", "<C-b>", function()
+	Snacks.picker.buffers({ layout = "vscode" })
+end, { desc = "Snacks: Buffers" })
+vim.keymap.set("n", "<C-n>", function()
+	Snacks.picker.explorer({ layout = "right" })
+end, { desc = "Snacks: Explorer" })
+vim.keymap.set("n", "<leader>fp", function()
+	Snacks.picker()
+end, { desc = "Snacks: Pickers" })
+vim.keymap.set("n", "<leader>ff", function()
+	Snacks.picker.smart()
+end, { desc = "Snacks: Files" })
+vim.keymap.set("n", "<leader>fr", function()
+	Snacks.picker.recent()
+end, { desc = "Snacks: Recent" })
+vim.keymap.set("n", "<leader>fs", function()
+	Snacks.picker.git_status()
+end, { desc = "Snacks: Git Status" })
+vim.keymap.set("n", "<leader>fw", function()
+	Snacks.picker.grep()
+end, { desc = "Snacks: Grep" })
+vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
+vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
 
 -- {{{ tree-sitter
