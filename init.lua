@@ -5,11 +5,13 @@
 -- Plugin Declaration {{{
 vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
 vim.pack.add({
+	{ src = "https://github.com/MunifTanjim/nui.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/chrisgrieser/nvim-origami" },
 	{ src = "https://github.com/f-person/auto-dark-mode.nvim" },
 	{ src = "https://github.com/folke/lazydev.nvim" },
+	{ src = "https://github.com/folke/noice.nvim" },
 	{ src = "https://github.com/folke/snacks.nvim" },
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
@@ -299,6 +301,93 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.cmd([[highlight! link MiniIndentscopeSymbol Identifier]])
 -- }}}
 
+-- noice.nvim {{{
+require("noice").setup({
+	presets = {
+		bottom_search = false, -- use a classic bottom cmdline for search
+		command_palette = false, -- position the cmdline and popupmenu together
+		long_message_to_split = true, -- long messages will be sent to a split
+		inc_rename = false, -- enables an input dialog for inc-rename.nvim
+		lsp_doc_border = false, -- add a border to hover docs and signature help
+	},
+	lsp = {
+		signature = { enabled = false },
+		hover = { enabled = true },
+		message = { enabled = false },
+	},
+	views = {
+		cmdline_popup = {
+			size = { min_width = 66 },
+			position = { row = "90%" },
+			border = { style = { "", " ", "", " ", "", " ", "", " " } },
+			win_options = { winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder" },
+		},
+		cmdline_input = {
+			view = "cmdline_popup",
+			border = { style = { "", " ", "", " ", "", " ", "", " " } },
+			win_options = { winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder" },
+		},
+	},
+	timeout = 2000,
+	fps = 60,
+	routes = {
+		{
+			filter = { find = "No information available" },
+			view = "mini",
+		},
+		{
+			filter = { find = "written" },
+			view = "mini",
+		},
+		{
+			filter = { find = "Successfully applied" },
+			view = "mini",
+		},
+		{
+			filter = { event = "msg_showmode" }, -- show recording msgs
+			view = "notify",
+		},
+	},
+})
+-- }}}
+
+-- sidekick.nvim {{{
+require("sidekick").setup({
+	cli = {
+		mux = {
+			backend = "tmux",
+			enabled = true,
+		},
+	},
+})
+vim.keymap.set("n", "<leader>ai", function()
+	require("sidekick.cli").toggle()
+end, { desc = "Sidekick: Toggle" })
+
+vim.keymap.set("n", "<leader>ap", function()
+	require("sidekick.cli").prompt()
+end, { desc = "Sidekick: Prompt" })
+
+vim.keymap.set({ "n", "x" }, "<tab>", function()
+	-- if there is a next edit, jump to it, otherwise apply it if any
+	if not require("sidekick").nes_jump_or_apply() then
+		return "<Tab>" -- fallback to normal tab
+	end
+end, { desc = "Sidekick: Next Edit", expr = true })
+
+vim.keymap.set({ "n", "x" }, "<leader>at", function()
+	require("sidekick.cli").send({ msg = "{this}" })
+end, { desc = "Sidekick: Send Reference" })
+
+vim.keymap.set("n", "<leader>af", function()
+	require("sidekick.cli").send({ msg = "{file}" })
+end, { desc = "Sidekick: Send File" })
+
+vim.keymap.set("x", "<leader>av", function()
+	require("sidekick.cli").send({ msg = "{selection}" })
+end, { desc = "Sidekick: Send Literal Selection" })
+-- }}}
+
 -- {{{ tree-sitter
 local ts_lang = {
 	-- web dev
@@ -405,7 +494,7 @@ vim.diagnostic.config({
 
 ---------------------------------------------------------------------------------------------------
 
--- {{{ Configs
+---{{{ Configs
 
 -- {{{ Options
 vim.cmd.colorscheme("catppuccin-macchiato")
