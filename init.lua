@@ -23,6 +23,7 @@ vim.pack.add({
 	{ src = "https://github.com/saghen/blink.cmp" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
+	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
 }, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
 
@@ -134,87 +135,61 @@ require("lazydev").setup({
 })
 --}}}
 
--- oil.nvim {{{
-require("oil").setup()
-vim.keymap.set("n", "<leader>o", ":Oil<CR>")
--- }}}
-
--- snacks.nvim {{{
-require("snacks").setup({
-	picker = { enabled = true },
-	dashboard = {
-		preset = {
-			header = [[
-░▀█▀░▄▀▀▄░█▀▄▀█░▄▀▀▄░█▀▀▄░█▀▀▄░▄▀▀▄░█░░░█
-░░█░░█░░█░█░▀░█░█░░█░█▄▄▀░█▄▄▀░█░░█░▀▄█▄▀
-░░▀░░░▀▀░░▀░░▒▀░░▀▀░░▀░▀▀░▀░▀▀░░▀▀░░░▀░▀░
-  ░█▀▀█░▄▀▀▄░█▀▄▀█░█▀▀░█▀▀
-  ░█░░░░█░░█░█░▀░█░█▀▀░▀▀▄
-  ░▀▀▀▀░░▀▀░░▀░░▒▀░▀▀▀░▀▀▀]],
-			keys = {
-				{ icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
-				{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-				{ icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
-				{ icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
-				{
-					icon = " ",
-					key = "d",
-					desc = "Config",
-					action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
-				},
-				{
-					icon = " ",
-					key = "s",
-					desc = "Scratch Buffer",
-					action = ":enew | setlocal buftype=nofile bufhidden=hide noswapfile",
-				},
-				{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+-- lualine.nvim {{{
+require("lualine").setup({
+	options = {
+		icons_enabled = true,
+		theme = "auto",
+		component_separators = "",
+		section_separators = { left = "", right = "" },
+		disabled_filetypes = {
+			statusline = {},
+			winbar = {},
+		},
+		ignore_focus = {},
+		always_divide_middle = true,
+		always_show_tabline = true,
+		globalstatus = true,
+		refresh = {
+			statusline = 1000,
+			tabline = 1000,
+			winbar = 1000,
+			refresh_time = 16, -- ~60fps
+			events = {
+				"WinEnter",
+				"BufEnter",
+				"BufWritePost",
+				"SessionLoadPost",
+				"FileChangedShellPost",
+				"VimResized",
+				"Filetype",
+				"CursorMoved",
+				"CursorMovedI",
+				"ModeChanged",
 			},
-			-- Used by the `header` section
-		},
-		sections = {
-			{ section = "header" },
-			{ section = "keys", gap = 1, padding = 1 },
-			-- { section = "startup" },
 		},
 	},
-	explorer = { enabled = true },
-	input = { enabled = true },
-	notifier = { enabled = true },
-	quickfile = { enabled = true },
-	scroll = {
-		animate = {
-			-- duration = { step = 50, total = 500 },
-			easing = "outSine",
-		},
+	sections = {
+		lualine_a = { { "mode", separator = { left = "" }, right_padding = 2 } },
+		lualine_b = { "filename" },
+		lualine_c = { "" },
+		lualine_x = { "lsp", "diagnostics" },
+		lualine_y = { "branch" },
+		lualine_z = { { "location", separator = { right = "" }, left_padding = 2 } },
 	},
-	statuscolumn = { enabled = true },
-	zen = { enabled = true },
-	-- bufdelete = { enabled = true },
+	inactive_sections = {
+		lualine_a = {},
+		lualine_b = {},
+		lualine_c = { "filename" },
+		lualine_x = { "location" },
+		lualine_y = {},
+		lualine_z = {},
+	},
+	tabline = {},
+	winbar = {},
+	inactive_winbar = {},
+	extensions = {},
 })
-vim.keymap.set("n", "<C-b>", function()
-	Snacks.picker.buffers({ layout = "vscode" })
-end, { desc = "Snacks: Buffers" })
-vim.keymap.set("n", "<C-n>", function()
-	Snacks.picker.explorer({ layout = "right" })
-end, { desc = "Snacks: Explorer" })
-vim.keymap.set("n", "<leader>fp", function()
-	Snacks.picker()
-end, { desc = "Snacks: Pickers" })
-vim.keymap.set("n", "<leader>ff", function()
-	Snacks.picker.smart()
-end, { desc = "Snacks: Files" })
-vim.keymap.set("n", "<leader>fr", function()
-	Snacks.picker.recent()
-end, { desc = "Snacks: Recent" })
-vim.keymap.set("n", "<leader>fs", function()
-	Snacks.picker.git_status()
-end, { desc = "Snacks: Git Status" })
-vim.keymap.set("n", "<leader>fw", function()
-	Snacks.picker.grep()
-end, { desc = "Snacks: Grep" })
-vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
-vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
 
 -- mini.nvim {{{
