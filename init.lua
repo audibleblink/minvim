@@ -13,11 +13,13 @@ vim.pack.add({
 	{ src = "https://github.com/folke/lazydev.nvim" },
 	{ src = "https://github.com/folke/noice.nvim" },
 	{ src = "https://github.com/folke/snacks.nvim" },
+	{ src = "https://github.com/folke/sidekick.nvim" },
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
 	{ src = "https://github.com/nvim-mini/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
 	{ src = "https://github.com/saghen/blink.cmp" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
@@ -33,6 +35,16 @@ require("blink.cmp").setup({
 	keymap = {
 		preset = "default",
 		["<C-l>"] = { "accept" },
+		["<Tab>"] = {
+			"snippet_forward",
+			function() -- sidekick next edit suggestion
+				return require("sidekick").nes_jump_or_apply()
+			end,
+			function() -- if you are using Neovim's native inline completions
+				return vim.lsp.inline_completion.get()
+			end,
+			"fallback",
+		},
 	},
 })
 -- }}}
@@ -436,6 +448,7 @@ require("mason").setup({ max_concurrent_installers = 8 })
 require("mason-lspconfig").setup({
 	ensure_installed = {
 		"basedpyright",
+		"copilot",
 		"denols",
 		"gopls",
 		"lua_ls",
@@ -649,7 +662,7 @@ end, {})
 -- {{{ Neovim Mappings
 vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Join w/o cursor moving" })
 vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
-vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>")
+vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>", { desc = "Source current file" })
 vim.keymap.set("n", "<cr>", ":")
 
 -- QoL
