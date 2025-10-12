@@ -5,24 +5,35 @@
 -- Plugin Declaration {{{
 vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
 vim.pack.add({
-	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
-	{ src = "https://github.com/neovim/nvim-lspconfig" },
-	{ src = "https://github.com/stevearc/oil.nvim" },
-	{ src = "https://github.com/nvim-mini/mini.nvim" },
-	{ src = "https://github.com/catppuccin/nvim" },
-	{ src = "https://github.com/mason-org/mason.nvim" },
-	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
-	{ src = "https://github.com/saghen/blink.cmp" },
-	{ src = "https://github.com/folke/lazy.nvim" },
-	{ src = "https://github.com/folke/snacks.nvim" },
-	{ src = "https://github.com/folke/lazydev.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
-	{ src = "https://github.com/stevearc/conform.nvim" },
+	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/chrisgrieser/nvim-origami" },
 	{ src = "https://github.com/f-person/auto-dark-mode.nvim" },
+	{ src = "https://github.com/folke/lazydev.nvim" },
+	{ src = "https://github.com/folke/snacks.nvim" },
+	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
+	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/neovim/nvim-lspconfig" },
+	{ src = "https://github.com/nvim-mini/mini.nvim" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+	{ src = "https://github.com/saghen/blink.cmp" },
+	{ src = "https://github.com/stevearc/conform.nvim" },
+	{ src = "https://github.com/stevearc/oil.nvim" },
 }, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
-require("blink.cmp").setup()
+
+-- blink.cmp {{{
+require("blink.cmp").setup({
+	completion = {
+		menu = { auto_show = false },
+		ghost_text = { enabled = true },
+	},
+	keymap = {
+		preset = "default",
+		["<C-l>"] = { "accept" },
+	},
+})
+-- }}}
 
 -- auto-dark-mode {{{
 require("auto-dark-mode").setup({
@@ -117,7 +128,42 @@ vim.keymap.set("n", "<leader>o", ":Oil<CR>")
 -- snacks.nvim {{{
 require("snacks").setup({
 	picker = { enabled = true },
-	dashboard = { enabled = true },
+	dashboard = {
+		preset = {
+			header = [[
+░▀█▀░▄▀▀▄░█▀▄▀█░▄▀▀▄░█▀▀▄░█▀▀▄░▄▀▀▄░█░░░█
+░░█░░█░░█░█░▀░█░█░░█░█▄▄▀░█▄▄▀░█░░█░▀▄█▄▀
+░░▀░░░▀▀░░▀░░▒▀░░▀▀░░▀░▀▀░▀░▀▀░░▀▀░░░▀░▀░
+  ░█▀▀█░▄▀▀▄░█▀▄▀█░█▀▀░█▀▀
+  ░█░░░░█░░█░█░▀░█░█▀▀░▀▀▄
+  ░▀▀▀▀░░▀▀░░▀░░▒▀░▀▀▀░▀▀▀]],
+			keys = {
+				{ icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+				{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+				{ icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+				{ icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+				{
+					icon = " ",
+					key = "d",
+					desc = "Config",
+					action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
+				},
+				{
+					icon = " ",
+					key = "s",
+					desc = "Scratch Buffer",
+					action = ":enew | setlocal buftype=nofile bufhidden=hide noswapfile",
+				},
+				{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+			},
+			-- Used by the `header` section
+		},
+		sections = {
+			{ section = "header" },
+			{ section = "keys", gap = 1, padding = 1 },
+			-- { section = "startup" },
+		},
+	},
 	explorer = { enabled = true },
 	input = { enabled = true },
 	notifier = { enabled = true },
@@ -158,8 +204,26 @@ vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
 
 -- mini.nvim {{{
+require("mini.align").setup()
+require("mini.bracketed").setup()
+require("mini.comment").setup()
 require("mini.icons").setup()
+require("mini.move").setup()
 require("mini.pairs").setup()
+require("mini.surround").setup()
+require("mini.bufremove").setup()
+vim.keymap.set("n", "<leader>q", require("mini.bufremove").delete, { desc = "Close buffer, keep split" })
+
+require("mini.ai").setup({
+	n_lines = 500,
+	custom_textobjects = {
+		m = {
+			{ "%b()", "%b[]", "%b{}" },
+			"^.().*().$",
+		},
+	},
+})
+
 require("mini.clue").setup({
 	triggers = {
 		{ mode = "n", keys = "<Leader>" },
@@ -201,25 +265,10 @@ require("mini.clue").setup({
 		config = { anchor = "NE", row = "auto", col = "auto" },
 	},
 })
-require("mini.align").setup()
-require("mini.bracketed").setup()
-require("mini.comment").setup()
-require("mini.move").setup()
-require("mini.surround").setup()
 require("mini.diff").setup({
 	view = {
 		style = "sign",
 		signs = { add = "┃", change = "┃", delete = "_" },
-	},
-})
-
-require("mini.ai").setup({
-	n_lines = 500,
-	custom_textobjects = {
-		m = {
-			{ "%b()", "%b[]", "%b{}" },
-			"^.().*().$",
-		},
 	},
 })
 
@@ -236,9 +285,6 @@ require("mini.indentscope").setup({
 		}),
 	},
 })
-
-require("mini.bufremove").setup()
-vim.keymap.set("n", "<leader>q", require("mini.bufremove").delete, { desc = "Close buffer, keep split" })
 
 local disabled = { "help", "terminal" }
 vim.api.nvim_create_autocmd("FileType", {
