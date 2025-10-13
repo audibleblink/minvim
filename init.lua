@@ -6,6 +6,7 @@
 vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
 vim.pack.add({
 	{ src = "https://github.com/MunifTanjim/nui.nvim" },
+	{ src = "https://github.com/audibleblink/i3tab.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/chrisgrieser/nvim-origami" },
@@ -568,6 +569,26 @@ vim.diagnostic.config({
 })
 -- }}} End: LSP and Completion
 
+-- i3tab {{{
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = function()
+		require("i3tab").setup({
+			separator_style = "dot",
+			show_numbers = false,
+			colors = {
+				active = {
+					fg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg,
+					bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg,
+				},
+				inactive = {
+					fg = vim.api.nvim_get_hl(0, { name = "Normal" }).fg,
+					bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).fg,
+				},
+			},
+		})
+	end,
+})
+-- }}}
 -- }}} End: Plugin Init and Config
 
 ---------------------------------------------------------------------------------------------------
