@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-fields
 -- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
 
 -- Plugin Init and Config {{{
@@ -329,7 +330,7 @@ require("nvim-tmux-navigation").setup({
 
 -- oil.nvim {{{
 require("oil").setup()
-vim.keymap.set("n", "<leader>o", ":Oil<CR>")
+vim.keymap.set("n", "<leader>o", ":Oil<CR>", { desc = "Oil: File Browser" })
 -- }}}
 
 -- origami.nvim {{{
@@ -506,7 +507,7 @@ vim.keymap.set("n", "<leader>fpp", function()
 end, { desc = "Snacks: Plugins" })
 vim.keymap.set("n", "<leader>fpa", function()
 	Snacks.picker.grep({ dirs = { vim.fn.stdpath("data") .. "/site/pack/core/opt" } })
-end, { desc = "Snacks: Plugins" })
+end, { desc = "Snacks: Grep Plugins" })
 vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
 vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
@@ -628,7 +629,7 @@ end, { desc = "Location List (Trouble)" })
 --
 -- undotree {{{
 require("undotree").setup()
-vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true, desc = "UndoTree" })
 -- }}}
 
 -- {{{ LSP and Completion (Mason)
