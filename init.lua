@@ -73,7 +73,7 @@ require("conform").setup({
 		python = { "ruff", "isort", "black" },
 		rust = { "rustfmt", lsp_format = "fallback" },
 		javascript = { "deno", stop_after_first = true },
-		go = { "gofumpt", "golines", "goimport-reviser" },
+		go = { "gofumpt", "golines", "goimports-reviser" },
 		sh = { "shfmt" },
 		lisp = { "cljfmt" },
 	},
@@ -262,17 +262,10 @@ vim.cmd([[highlight! link MiniIndentscopeSymbol Identifier]])
 -- noice.nvim {{{
 
 require("noice").setup({
-	presets = {
-		bottom_search = false, -- use a classic bottom cmdline for search
-		command_palette = false, -- position the cmdline and popupmenu together
-		long_message_to_split = true, -- long messages will be sent to a split
-		inc_rename = false, -- enables an input dialog for inc-rename.nvim
-		lsp_doc_border = false, -- add a border to hover docs and signature help
-	},
 	lsp = {
 		signature = { enabled = false },
-		hover = { enabled = true },
-		message = { enabled = false },
+		hover = { enabled = false },
+		message = { enabled = true },
 	},
 	views = {
 		cmdline_popup = {
@@ -287,7 +280,7 @@ require("noice").setup({
 			win_options = { winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder" },
 		},
 	},
-	timeout = 2000,
+	timeout = 1000,
 	fps = 60,
 	routes = {
 		{
@@ -301,10 +294,6 @@ require("noice").setup({
 		{
 			filter = { find = "Successfully applied" },
 			view = "mini",
-		},
-		{
-			filter = { event = "msg_showmode" }, -- show recording msgs
-			view = "notify",
 		},
 	},
 })
@@ -513,23 +502,29 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 -- }}}
 
--- {{{ LSP and Completion
+-- {{{ LSP and Completion (Mason)
+_G.debuggers = {
+	"delve",
+	"debugpy",
+}
+
+_G.lang_servers = {
+	"basedpyright",
+	"copilot",
+	"denols",
+	"gopls",
+	"lua_ls",
+	"markdown_oxide",
+	"ruff",
+	"rust_analyzer",
+	"tinymist",
+	"yamlls",
+	"zls",
+}
+
 require("mason").setup({ max_concurrent_installers = 8 })
-require("mason-lspconfig").setup({
-	ensure_installed = {
-		"basedpyright",
-		"copilot",
-		"denols",
-		"gopls",
-		"lua_ls",
-		"markdown_oxide",
-		"ruff",
-		"rust_analyzer",
-		"tinymist",
-		"yamlls",
-		"zls",
-	},
-})
+require("mason-lspconfig").setup({ ensure_installed = _G.lang_servers })
+
 -- Register completion capabilities universally
 vim.lsp.config("*", {
 	capabilities = require("blink.cmp").get_lsp_capabilities(),
@@ -625,14 +620,29 @@ vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
 
 -- {{{ AutoCommands
 
--- vim.api.nvim_create_autocmd("LspAttach", {
--- 	callback = function(ev)
--- 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
--- 		if client:supports_method("textDocument/completion") then
--- 			vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
--- 		end
--- 	end,
--- })
+vim.api.nvim_create_user_command("MasonInstallAll", function()
+	local mason_packages = {}
+	vim.list_extend(mason_packages, _G.debuggers)
+	for _, v in ipairs(require("conform").list_all_formatters()) do
+		local fmts = vim.split(v.name:gsub(",", ""), "%s+")
+		vim.list_extend(mason_packages, fmts)
+	end
+
+	vim.cmd("Mason")
+	local mr = require("mason-registry")
+	mr.refresh(function()
+		for _, tool in ipairs(mason_packages) do
+			local pkg = { name = tool, version = nil }
+			local p = mr.get_package(pkg.name)
+
+			if not p:is_installed() then
+				p:install({ version = pkg.version })
+			end
+		end
+	end)
+end, {})
+
+-- Create project-specific shada-files
 --
 
 -- highlight yanked text for 300ms using the "Visual" highlight group
