@@ -90,6 +90,27 @@ vim.keymap.set("n", "gm", function()
 end, { desc = "Format Files" })
 -- }}}
 
+-- i3tab {{{
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = function()
+		require("i3tab").setup({
+			separator_style = "dot",
+			show_numbers = false,
+			colors = {
+				active = {
+					fg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg,
+					bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg,
+				},
+				inactive = {
+					fg = vim.api.nvim_get_hl(0, { name = "Normal" }).fg,
+					bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).fg,
+				},
+			},
+		})
+	end,
+})
+-- }}}
+--
 -- lazydev.nvim {{{
 require("lazydev").setup({
 	library = {
