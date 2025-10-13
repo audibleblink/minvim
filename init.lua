@@ -24,6 +24,7 @@ vim.pack.add({
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
+	{ src = "https://github.com/arkav/lualine-lsp-progress" },
 }, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
 
@@ -97,44 +98,53 @@ require("lazydev").setup({
 --}}}
 
 -- lualine.nvim {{{
+--
 require("lualine").setup({
 	options = {
 		icons_enabled = true,
 		theme = "auto",
 		component_separators = "",
 		section_separators = { left = "", right = "" },
-		disabled_filetypes = {
-			statusline = {},
-			winbar = {},
-		},
-		ignore_focus = {},
-		always_divide_middle = true,
-		always_show_tabline = true,
 		globalstatus = true,
+
 		refresh = {
-			statusline = 1000,
-			tabline = 1000,
-			winbar = 1000,
-			refresh_time = 16, -- ~60fps
-			events = {
-				"WinEnter",
-				"BufEnter",
-				"BufWritePost",
-				"SessionLoadPost",
-				"FileChangedShellPost",
-				"VimResized",
-				"Filetype",
-				"CursorMoved",
-				"CursorMovedI",
-				"ModeChanged",
-			},
+			statusline = 33,
+			refresh_time = 33, -- ~60fps
 		},
 	},
 	sections = {
 		lualine_a = { { "mode", separator = { left = "" }, right_padding = 2 } },
 		lualine_b = { "filename" },
-		lualine_c = { "" },
-		lualine_x = { "lsp", "diagnostics" },
+		lualine_c = {
+			{
+				require("noice").api.status.mode.get_hl, ---@diagnostic disable-line: undefined-field
+				cond = require("noice").api.status.mode.has, ---@diagnostic disable-line: undefined-field
+				icon = "󰑋",
+				color = { fg = "#ff0000" },
+			},
+			"%=",
+			"diagnostics",
+		},
+		lualine_x = {
+			{
+				"lsp_progress",
+				separators = {
+					component = " ",
+					progress = " | ",
+
+					percentage = { pre = "", post = "%% " },
+					title = { pre = "", post = ": " },
+					lsp_client_name = { pre = " ", post = "" },
+					spinner = { pre = "", post = "" },
+
+					message = { commenced = " ", completed = "󰗠 " },
+				},
+				display_components = { "lsp_client_name", "spinner", { "title", "percentage" } },
+				-- display_components = { "lsp_client_name", "spinner", { "title", "percentage", "message" } },
+				timer = { message = 2000, progress_enddelay = 2000, spinner = 2000, lsp_client_name_enddelay = -1 },
+				spinner_symbols = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
+			},
+		},
 		lualine_y = { "branch" },
 		lualine_z = { { "location", separator = { right = "" }, left_padding = 2 } },
 	},
@@ -149,7 +159,7 @@ require("lualine").setup({
 	tabline = {},
 	winbar = {},
 	inactive_winbar = {},
-	extensions = {},
+	extensions = { "quickfix", "mason", "oil" },
 })
 -- }}}
 
