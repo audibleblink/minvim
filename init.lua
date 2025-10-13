@@ -15,6 +15,7 @@ vim.pack.add({
 	{ src = "https://github.com/folke/noice.nvim" },
 	{ src = "https://github.com/folke/snacks.nvim" },
 	{ src = "https://github.com/folke/sidekick.nvim" },
+	{ src = "https://github.com/folke/trouble.nvim" },
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
@@ -510,7 +511,79 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 -- }}}
+--
+-- trouble.nvim {{{
+require("trouble").setup({
+	icons = {
+		indent = {
+			ws = " ",
+			top = "│ ",
+			middle = "├╴",
+			last = "└╴",
+			-- last          = "-╴",
+			-- last       = "╰╴", -- rounded
+			fold_open = " ",
+			fold_closed = " ",
+		},
+		folder_closed = "",
+		folder_open = "",
+		kinds = {
+			Array = "",
+			Boolean = "󰨙",
+			Class = "",
+			Constant = "󰏿",
+			Constructor = "",
+			Enum = "",
+			EnumMember = "",
+			Event = "",
+			Field = "",
+			File = "",
+			Function = "󰊕",
+			Interface = "",
+			Key = "",
+			Method = "󰊕",
+			Module = "",
+			Namespace = "󰦮",
+			Null = "",
+			Number = "󰎠",
+			Object = "",
+			Operator = "",
+			Package = "",
+			Property = "",
+			String = "",
+			Struct = "󰆼",
+			TypeParameter = "",
+			Variable = "󰀫",
+		},
+	},
+	modes = {
+		symbols = {
+			focus = false,
+			win = { position = "left" },
+			mode = "lsp_document_symbols",
+		},
+	},
+})
 
+local trouble = require("trouble")
+
+vim.keymap.set("n", "<M-n>", function()
+	trouble.toggle({ mode = "symbols" })
+end, { desc = "Symbols Outline" })
+
+vim.keymap.set("n", "<leader>xq", function()
+	trouble.toggle({ mode = "qflist" })
+end, { desc = "Quickfix List (Trouble)" })
+
+vim.keymap.set("n", "<leader>xX", function()
+	trouble.toggle({ mode = "diagnostics" })
+end, { desc = "Diagnostic List (Trouble)" })
+
+vim.keymap.set("n", "<leader>xx", function()
+	trouble.toggle({ mode = "diagnostics", filter = { buf = 0 } })
+end, { desc = "Location List (Trouble)" })
+-- }}}
+--
 -- undotree {{{
 require("undotree").setup()
 vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true })
