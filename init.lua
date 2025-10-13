@@ -172,7 +172,7 @@ require("lualine").setup({
 	tabline = {},
 	winbar = {},
 	inactive_winbar = {},
-	extensions = { "quickfix", "mason", "oil" },
+	extensions = { "quickfix", "mason", "oil", "trouble" },
 })
 -- }}}
 
@@ -472,7 +472,11 @@ require("snacks").setup({
 			easing = "outSine",
 		},
 	},
-	statuscolumn = { enabled = true },
+	statuscolumn = {
+		left = { "sign", "git", "mark" },
+		right = { "fold" },
+		folds = { open = true },
+	},
 	zen = { enabled = true },
 	-- bufdelete = { enabled = true },
 })
