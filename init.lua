@@ -5,7 +5,9 @@
 -- Plugin Declaration {{{
 vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
 vim.pack.add({
+	-- Deps and Extensions
 	{ src = "https://github.com/MunifTanjim/nui.nvim" },
+	-- Core
 	{ src = "https://github.com/audibleblink/i3tab.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 	{ src = "https://github.com/catppuccin/nvim" },
@@ -111,7 +113,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 	end,
 })
 -- }}}
---
+
 -- lazydev.nvim {{{
 require("lazydev").setup({
 	library = {
@@ -450,7 +452,7 @@ end, { desc = "Snacks: Buffers" })
 vim.keymap.set("n", "<C-n>", function()
 	Snacks.picker.explorer({ layout = "right" })
 end, { desc = "Snacks: Explorer" })
-vim.keymap.set("n", "<leader>fp", function()
+vim.keymap.set("n", "<leader>fa", function()
 	Snacks.picker()
 end, { desc = "Snacks: Pickers" })
 vim.keymap.set("n", "<leader>ff", function()
@@ -465,6 +467,12 @@ end, { desc = "Snacks: Git Status" })
 vim.keymap.set("n", "<leader>fw", function()
 	Snacks.picker.grep()
 end, { desc = "Snacks: Grep" })
+vim.keymap.set("n", "<leader>fpp", function()
+	Snacks.picker.files({ dirs = { vim.fn.stdpath("data") .. "/site/pack/core/opt" } })
+end, { desc = "Snacks: Plugins" })
+vim.keymap.set("n", "<leader>fpa", function()
+	Snacks.picker.grep({ dirs = { vim.fn.stdpath("data") .. "/site/pack/core/opt" } })
+end, { desc = "Snacks: Plugins" })
 vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
 vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 -- }}}
