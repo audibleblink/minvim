@@ -47,7 +47,7 @@ require("auto-dark-mode").setup({
 require("blink.cmp").setup({
 	completion = {
 		menu = { auto_show = false },
-		ghost_text = { enabled = true },
+		ghost_text = { enabled = false },
 	},
 	keymap = {
 		preset = "default",
@@ -149,22 +149,9 @@ require("lualine").setup({
 		},
 		lualine_x = {
 			{
-				"lsp_progress",
-				separators = {
-					component = " ",
-					progress = " | ",
-
-					percentage = { pre = "", post = "%% " },
-					title = { pre = "", post = ": " },
-					lsp_client_name = { pre = " ", post = "" },
-					spinner = { pre = "", post = "" },
-
-					message = { commenced = " ", completed = "󰗠 " },
-				},
-				display_components = { "lsp_client_name", "spinner", { "title", "percentage" } },
-				-- display_components = { "lsp_client_name", "spinner", { "title", "percentage", "message" } },
-				timer = { message = 2000, progress_enddelay = 2000, spinner = 2000, lsp_client_name_enddelay = -1 },
-				spinner_symbols = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
+				"lsp_status",
+				icon = " ",
+				ignore_lsp = { "copilot", "stylua" },
 			},
 		},
 		lualine_y = { "branch" },
@@ -287,7 +274,7 @@ require("noice").setup({
 	lsp = {
 		signature = { enabled = false },
 		hover = { enabled = false },
-		message = { enabled = true },
+		progress = { enabled = true },
 	},
 	views = {
 		cmdline_popup = {
@@ -595,26 +582,6 @@ vim.diagnostic.config({
 })
 -- }}} End: LSP and Completion
 
--- i3tab {{{
-vim.api.nvim_create_autocmd("ColorScheme", {
-	callback = function()
-		require("i3tab").setup({
-			separator_style = "dot",
-			show_numbers = false,
-			colors = {
-				active = {
-					fg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg,
-					bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).bg,
-				},
-				inactive = {
-					fg = vim.api.nvim_get_hl(0, { name = "Normal" }).fg,
-					bg = vim.api.nvim_get_hl(0, { name = "TabLineSel" }).fg,
-				},
-			},
-		})
-	end,
-})
--- }}}
 -- }}} End: Plugin Init and Config
 
 ---------------------------------------------------------------------------------------------------
