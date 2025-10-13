@@ -25,7 +25,7 @@ vim.pack.add({
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
-	{ src = "https://github.com/arkav/lualine-lsp-progress" },
+	{ src = "https://github.com/jiaoshijie/undotree" },
 }, { load = true, confirm = false })
 -- }}} End: Plugin Declaration
 
@@ -501,6 +501,11 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.treesitter.start()
 	end,
 })
+-- }}}
+
+-- undotree {{{
+require("undotree").setup()
+vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true })
 -- }}}
 
 -- {{{ LSP and Completion (Mason)
