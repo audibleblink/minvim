@@ -20,6 +20,7 @@ vim.pack.add({
 	{ src = "https://github.com/folke/trouble.nvim" },
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
 	{ src = "https://github.com/nvim-mini/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
@@ -354,6 +355,35 @@ vim.keymap.set("n", "<leader>o", ":Oil<CR>")
 -- 		hOnlyOpensOnFirstColumn = false,
 -- 	},
 -- })
+-- }}}
+
+-- render-markdown.nvim {{{
+require("render-markdown").setup({
+	completions = { lsp = { enabled = true } },
+	render_modes = true, -- Render in ALL modes
+	sign = {
+		enabled = false, -- Turn off in the status column
+	},
+	latex = { enabled = false },
+	overrides = {
+		filetype = {
+			codecompanion = {
+				html = {
+					tag = {
+						buf = { icon = " ", highlight = "CodeCompanionChatIcon" },
+						file = { icon = " ", highlight = "CodeCompanionChatIcon" },
+						group = { icon = " ", highlight = "CodeCompanionChatIcon" },
+						help = { icon = "󰘥 ", highlight = "CodeCompanionChatIcon" },
+						image = { icon = " ", highlight = "CodeCompanionChatIcon" },
+						symbols = { icon = " ", highlight = "CodeCompanionChatIcon" },
+						tool = { icon = "󰯠 ", highlight = "CodeCompanionChatIcon" },
+						url = { icon = "󰌹 ", highlight = "CodeCompanionChatIcon" },
+					},
+				},
+			},
+		},
+	},
+})
 -- }}}
 
 -- sidekick.nvim {{{
