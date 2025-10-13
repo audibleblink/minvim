@@ -644,6 +644,15 @@ end, {})
 
 -- Create project-specific shada-files
 --
+opt.shadafile = (function()
+	local git_root = vim.fs.root(0, ".git")
+	if not git_root then
+		return
+	end
+	local shadafile = vim.fs.joinpath(vim.fn.stdpath("state"), "_shada", vim.base64.encode(git_root))
+	vim.fn.mkdir(vim.fs.dirname(shadafile), "p")
+	return shadafile
+end)()
 
 -- highlight yanked text for 300ms using the "Visual" highlight group
 --
@@ -722,6 +731,8 @@ vim.api.nvim_create_autocmd("WinEnter", {
 	end,
 })
 
+-- Git commit within current session
+--
 vim.api.nvim_create_user_command("Commit", function()
 	-- This causes git to create COMMIT_EDITMSG but not complete the commit
 	vim.fn.system("GIT_EDITOR=true git commit -v")
