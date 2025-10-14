@@ -1,4 +1,4 @@
----@diagnostic disable: missing-fields
+---@diagnostic disable: missing-fields, param-type-mismatch, undefined-field
 -- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
 
 -- Plugin Init and Config {{{
@@ -867,6 +867,7 @@ o.numberwidth = 2
 
 -- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
+vim.lsp.inlay_hint.enable()
 -- }}} End Options
 
 -- {{{ AutoCommands
@@ -1075,6 +1076,16 @@ vim.keymap.set("t", "<C-h>", navigate_from_terminal("h"))
 vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
 vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
 vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
+
+-- Toggle LSP inlay hints and inline completions and notify of status
+vim.keymap.set("n", "<leader>ac", function()
+	vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
+	vim.notify(
+		"LSP inlay hints and inline completions "
+			.. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
+		vim.log.levels.INFO
+	)
+end, { desc = "LSP: Toggle AI Completions" })
 
 -- }}} End Mappings
 
