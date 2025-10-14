@@ -590,9 +590,8 @@ require("snacks").setup({
 		},
 	},
 	statuscolumn = {
-		left = { "sign", "git", "mark" },
-		right = { "fold" },
-		folds = { open = true },
+		left = { "sign" },
+		right = { "git", "mark" },
 	},
 	zen = { enabled = true },
 	-- bufdelete = { enabled = true },
