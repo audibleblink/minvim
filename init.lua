@@ -134,10 +134,18 @@ require("floaterm").setup({
 	},
 })
 
-vim.keymap.set("n", "<leader>gP", function()
-	require("floaterm.api").open_and_run({ name = "Git", cmd = "git push" })
-end, { desc = "Floaterm: Git Push" })
 vim.keymap.set({ "n", "t" }, "``", require("floaterm").toggle, { desc = "Floaterm: Toggle" })
+
+vim.keymap.set("n", "ghP", function()
+	require("floaterm.api").open_and_run({ name = "Git", cmd = "git push" })
+end, { desc = "[Git] Floaterm: Push" })
+
+vim.keymap.set("n", "ghl", function()
+	require("floaterm.api").open_and_run({
+		name = "Git",
+		cmd = [[git log --graph --decorate --all --pretty=format:"%C(cyan)%h%Creset %C()%s%Creset%n%C(dim italic white)      └─ %ar by %an %C(auto)  %D%n"]],
+	})
+end, { desc = "[Git] Floaterm: Log" })
 
 -- }}}
 
@@ -985,7 +993,7 @@ vim.api.nvim_create_user_command("Commit", function()
 		end,
 	})
 end, {})
-vim.keymap.set("n", "<leader>gc", vim.cmd.Commit, { desc = "Git Commit" })
+vim.keymap.set("n", "ghc", vim.cmd.Commit, { desc = "Git Commit" })
 -- }}} End: AutoCommands
 
 -- {{{ Neovim Mappings
