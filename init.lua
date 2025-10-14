@@ -9,6 +9,7 @@ vim.cmd.packadd("nohlsearch")
 vim.pack.add({
 	-- Deps and Extensions
 	{ src = "https://github.com/MunifTanjim/nui.nvim" },
+	{ src = "https://github.com/nvzone/volt" },
 	-- Core
 	{ src = "https://github.com/audibleblink/i3tab.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
@@ -27,6 +28,8 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-mini/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
+	-- { src = "https://github.com/nvzone/floaterm" },
+	{ src = "https://github.com/audibleblink/floaterm", version = "feature/open" },
 	{ src = "https://github.com/saghen/blink.cmp" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
@@ -115,6 +118,26 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 		})
 	end,
 })
+-- }}}
+
+-- floaterm {{{
+require("floaterm").setup({
+	size = { h = 70, w = 80 },
+	mappings = {
+		sidebar = nil,
+		term = function(buf)
+			vim.keymap.set({ "n", "t" }, "``", function()
+				require("floaterm").toggle()
+			end, { buffer = buf })
+		end,
+	},
+})
+
+vim.keymap.set("n", "<leader>gP", function()
+	require("floaterm.api").open_and_run({ name = "Git", cmd = "echo 'pushed!'" })
+end, { desc = "Floaterm: Git Push" })
+vim.keymap.set({ "n", "t" }, "``", require("floaterm").toggle, { desc = "Floaterm: Toggle" })
+
 -- }}}
 
 -- lazydev.nvim {{{
@@ -955,41 +978,6 @@ vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
 vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
 vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 
-local modes = { "n", "t" }
-local function run_in_terminal(cmd, opts)
-	opts = opts or {}
-	local direction = opts.direction or "normal"
-	if direction == "vsplit" then
-		vim.cmd("vsplit")
-	elseif direction == "hsplit" then
-		vim.cmd("split")
-	elseif direction == "tab" then
-		vim.cmd("tabnew")
-	elseif direction == "float" then
-		-- TODO floating window logic
-	end
-	local term_buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_win_set_buf(0, term_buf)
-	---@diagnostic disable-next-line: deprecated
-	vim.fn.termopen(cmd, opts or {})
-end
-
-local last_cmd = ""
-vim.keymap.set(modes, "<leader>tr", function()
-	local cmd = vim.fn.input("Command to run: ", last_cmd)
-	if cmd and cmd ~= "" then
-		last_cmd = cmd
-		run_in_terminal(cmd, { direction = "tab" })
-	end
-end, { desc = "Run user command in terminal" })
-
-vim.keymap.set(modes, "<leader>ts", function()
-	local cmd = vim.fn.input("Command to run (vs): ", last_cmd)
-	if cmd and cmd ~= "" then
-		last_cmd = cmd
-		run_in_terminal(cmd, { direction = "vsplit" })
-	end
-end, { desc = "Run user command in vertical split terminal" })
 -- }}} End Mappings
 
 -- }}} End: Configs
