@@ -902,6 +902,7 @@ vim.api.nvim_create_user_command("Commit", function()
 		end,
 	})
 end, {})
+vim.keymap.set("n", "<leader>gc", "<cmd>Commit<cr>", { desc = "Git Commit" })
 -- }}} End: AutoCommands
 
 -- {{{ Neovim Mappings
