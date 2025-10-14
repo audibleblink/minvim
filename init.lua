@@ -823,15 +823,6 @@ local custom = {
 for server, config in pairs(custom) do
 	vim.lsp.config(server, config)
 end
-local x = vim.diagnostic.severity
-vim.diagnostic.config({
-	update_in_insert = false,
-	signs = { text = { [x.ERROR] = "󰅙", [x.WARN] = "", [x.INFO] = "󰋼", [x.HINT] = "󰌵" } },
-	virtual_text = { current_line = true, severity = { min = x.HINT } },
-	severity_sort = true,
-	underline = true,
-	float = { border = "single" },
-})
 -- }}} End: LSP and Completion
 
 -- }}} End: Plugin Init and Config
@@ -881,7 +872,17 @@ o.numberwidth = 2
 
 -- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
+
 vim.lsp.inlay_hint.enable()
+local x = vim.diagnostic.severity
+vim.diagnostic.config({
+	update_in_insert = false,
+	signs = { text = { [x.ERROR] = "󰅙", [x.WARN] = "", [x.INFO] = "󰋼", [x.HINT] = "󰌵" } },
+	virtual_text = { current_line = true, severity = { min = x.HINT } },
+	severity_sort = true,
+	underline = true,
+	float = { border = "rounded", header = "Diagnostics" },
+})
 -- }}} End Options
 
 -- {{{ AutoCommands
