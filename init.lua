@@ -21,6 +21,7 @@ vim.pack.add({
 	{ src = "https://github.com/folke/snacks.nvim" },
 	{ src = "https://github.com/folke/sidekick.nvim" },
 	{ src = "https://github.com/folke/trouble.nvim" },
+	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
@@ -138,6 +139,88 @@ vim.keymap.set("n", "<leader>gP", function()
 end, { desc = "Floaterm: Git Push" })
 vim.keymap.set({ "n", "t" }, "``", require("floaterm").toggle, { desc = "Floaterm: Toggle" })
 
+-- }}}
+
+-- gitsigns.nvim {{{
+require("gitsigns").setup({
+	on_attach = function(bufnr)
+		local gitsigns = require("gitsigns")
+
+		local function map(mode, l, r, opts)
+			opts = opts or {}
+			opts.buffer = bufnr
+			vim.keymap.set(mode, l, r, opts)
+		end
+
+		-- Navigation
+		map("n", "]g", function()
+			if vim.wo.diff then
+				vim.cmd.normal({ "]g", bang = true })
+			else
+				gitsigns.nav_hunk("next")
+			end
+		end, { desc = "[Git] Next Hunk" })
+
+		map("n", "[g", function()
+			if vim.wo.diff then
+				vim.cmd.normal({ "[g", bang = true })
+			else
+				gitsigns.nav_hunk("prev")
+			end
+		end, { desc = "[Git] Prev Hunk" })
+
+		-- Actions
+		map("v", "ghs", function()
+			gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+		end, { desc = "[Git] Stage Hunk" })
+
+		map("v", "ghr", function()
+			gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+		end, { desc = "[Git] Reset Hunk" })
+
+		map("n", "ghs", gitsigns.stage_hunk, { desc = "[Git] Stage Hunk" })
+		map("n", "ghr", gitsigns.reset_hunk, { desc = "[Git] Reset Hunk" })
+		map("n", "ghS", gitsigns.stage_buffer, { desc = "[Git] Stage Buffer" })
+		map("n", "ghR", gitsigns.reset_buffer, { desc = "[Git] Reset Buffer" })
+		map("n", "ghp", gitsigns.preview_hunk, { desc = "[Git] Preview Hunk" })
+		map("n", "ghi", gitsigns.preview_hunk_inline, { desc = "[Git] Preview Hunk Inline" })
+		map("n", "ghd", gitsigns.diffthis, { desc = "[Git] Diff This" })
+
+		map("n", "ghb", function()
+			gitsigns.blame_line({ full = true })
+		end, { desc = "[Git] Blame Hunk" })
+
+		-- map("n", "<leader>gD", function()
+		-- 	gitsigns.diffthis("~")
+		-- end, { desc = "[Git] Diff This" })
+
+		map("n", "ghQ", function()
+			gitsigns.setqflist("all")
+		end, { desc = "[Git] Send All Hunks to QF" })
+		map("n", "ghq", gitsigns.setqflist, { desc = "[Git] Send Hunk to QF" })
+
+		-- Motion-based hunk staging
+		local function stage_hunk_operator()
+			local start_pos = vim.api.nvim_buf_get_mark(0, "[")
+			local end_pos = vim.api.nvim_buf_get_mark(0, "]")
+			gitsigns.stage_hunk({ start_pos[1], end_pos[1] })
+		end
+
+		-- Toggles
+		map("n", "<leader>ghtb", gitsigns.toggle_current_line_blame, { desc = "[Git] Toggle Line Blame" })
+		map("n", "<leader>ghtw", gitsigns.toggle_word_diff, { desc = "[Git] Toggle Word Diff" })
+
+		map("n", "gs", function()
+			_G._stage_hunk_operator = stage_hunk_operator
+			vim.o.operatorfunc = "v:lua._stage_hunk_operator"
+			return "g@"
+		end, { expr = true, desc = "[Git] Stage hunk with motion" })
+
+		-- Text objects
+		map({ "o", "x" }, "ih", gitsigns.select_hunk, { desc = "[Git] Hunk" })
+		map("n", "gss", "gsih", { desc = "[Git] Stage Hunk", remap = true })
+	end,
+})
 -- }}}
 
 -- lazydev.nvim {{{
@@ -263,12 +346,13 @@ require("mini.clue").setup({
 		config = { anchor = "NE", row = "auto", col = "auto" },
 	},
 })
-require("mini.diff").setup({
-	view = {
-		style = "sign",
-		signs = { add = "┃", change = "┃", delete = "_" },
-	},
-})
+
+-- require("mini.diff").setup({
+-- 	view = {
+-- 		style = "sign",
+-- 		signs = { add = "┃", change = "┃", delete = "_" },
+-- 	},
+-- })
 
 require("mini.indentscope").setup({
 	symbol = "┃",
@@ -761,7 +845,6 @@ o.tabstop = 4
 o.termguicolors = true
 o.timeoutlen = 500
 o.undofile = true
-o.updatetime = 500 -- used by gitsigns/CursorHold
 o.winborder = "rounded"
 o.wrap = false
 -- Numbers
@@ -902,7 +985,7 @@ vim.api.nvim_create_user_command("Commit", function()
 		end,
 	})
 end, {})
-vim.keymap.set("n", "<leader>gc", "<cmd>Commit<cr>", { desc = "Git Commit" })
+vim.keymap.set("n", "<leader>gc", vim.cmd.Commit, { desc = "Git Commit" })
 -- }}} End: AutoCommands
 
 -- {{{ Neovim Mappings
