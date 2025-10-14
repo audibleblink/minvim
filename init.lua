@@ -5,6 +5,7 @@
 
 -- Plugin Declaration {{{
 vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
+vim.cmd.packadd("nohlsearch")
 vim.pack.add({
 	-- Deps and Extensions
 	{ src = "https://github.com/MunifTanjim/nui.nvim" },
@@ -924,18 +925,9 @@ vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase widt
 vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>") -- Decrease width
 
 -- Smart highlight cancelling
-vim.keymap.set("n", "n", "nzzzv:set cursorcolumn hlsearch<CR>")
-vim.keymap.set("n", "N", "Nzzzv:set cursorcolumn hlsearch<CR>")
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
 
-vim.on_key(function(char)
-	if vim.fn.mode() == "n" then
-		local new_hlsearch = vim.tbl_contains({ "<CR>", "*", "#", "?", "/" }, vim.fn.keytrans(char))
-		if vim.opt.hlsearch ~= new_hlsearch then
-			vim.opt.hlsearch = new_hlsearch
-			vim.opt.cursorcolumn = false
-		end
-	end
-end, vim.api.nvim_create_namespace("auto_hlsearch"))
 ------------------------------------ Brace Match ---------------------------------------
 -- NOTE custom objects config'd in mini.ai plugin
 vim.keymap.set("n", "mm", "%")
