@@ -135,7 +135,7 @@ require("floaterm").setup({
 })
 
 vim.keymap.set("n", "<leader>gP", function()
-	require("floaterm.api").open_and_run({ name = "Git", cmd = "echo 'pushed!'" })
+	require("floaterm.api").open_and_run({ name = "Git", cmd = "git push" })
 end, { desc = "Floaterm: Git Push" })
 vim.keymap.set({ "n", "t" }, "``", require("floaterm").toggle, { desc = "Floaterm: Toggle" })
 
