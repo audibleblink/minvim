@@ -542,7 +542,14 @@ end, { desc = "Sidekick: Send Literal Selection" })
 
 -- snacks.nvim {{{
 require("snacks").setup({
-	picker = { enabled = true },
+	picker = {
+		sources = {
+			explorer = {
+				jump = { close = true },
+				auto_close = true,
+			},
+		},
+	},
 	dashboard = {
 		preset = {
 			header = [[
@@ -669,7 +676,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 -- }}}
---
+
 -- trouble.nvim {{{
 require("trouble").setup({
 	icons = {
@@ -741,7 +748,7 @@ vim.keymap.set("n", "<leader>xx", function()
 	trouble.toggle({ mode = "diagnostics", filter = { buf = 0 } })
 end, { desc = "Location List (Trouble)" })
 -- }}}
---
+
 -- undotree {{{
 require("undotree").setup()
 vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true, desc = "UndoTree" })
