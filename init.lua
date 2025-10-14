@@ -72,6 +72,11 @@ require("blink.cmp").setup({
 			end,
 			"fallback",
 		},
+		["<C-right>"] = {
+			function()
+				return vim.lsp.inline_completion.select()
+			end,
+		},
 	},
 })
 -- }}}
