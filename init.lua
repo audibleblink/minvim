@@ -255,12 +255,21 @@ require("lualine").setup({
 		},
 	},
 	sections = {
-		lualine_a = { { "mode", separator = { left = "" }, right_padding = 2 } },
+		lualine_a = {
+			{
+				"mode",
+				fmt = function()
+					return "󰞷 "
+				end,
+				separator = { left = "" },
+				right_padding = 2,
+			},
+		},
 		lualine_b = { "filename" },
 		lualine_c = {
 			{
-				require("noice").api.status.mode.get_hl, ---@diagnostic disable-line: undefined-field
-				cond = require("noice").api.status.mode.has, ---@diagnostic disable-line: undefined-field
+				require("noice").api.status.mode.get_hl,
+				cond = require("noice").api.status.mode.has,
 				icon = "󰑋",
 				color = { fg = "#ff0000" },
 			},
