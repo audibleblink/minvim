@@ -459,8 +459,19 @@ require("nvim-tmux-navigation").setup({
 -- }}}
 
 -- oil.nvim {{{
-require("oil").setup()
-vim.keymap.set("n", "<leader>o", ":Oil<CR>", { desc = "Oil: File Browser" })
+require("oil").setup({
+	keymaps = {
+		["q"] = "actions.close",
+		["<esc>"] = "actions.close",
+	},
+
+	float = {
+		padding = 5,
+		border = "rounded",
+	},
+})
+vim.keymap.set("n", "<leader>o", ":Oil --float<CR>", { desc = "Oil: File Browser" })
+
 -- }}}
 
 -- origami.nvim {{{
