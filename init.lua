@@ -1116,10 +1116,16 @@ vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
 vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 
 -- Toggle LSP inlay hints and inline completions and notify of status
+vim.keymap.set("n", "<leader>an", function()
+	local nes = require("sidekick.nes")
+	nes.enable(not nes.enabled)
+	vim.notify("Sidekick NES " .. (nes.enabled and "enabled" or "disabled"), vim.log.levels.INFO)
+end, { desc = "Sidekick: Toggle NES" })
+
 vim.keymap.set("n", "<leader>ac", function()
 	vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
 	vim.notify(
-		"LSP completions " .. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
+		"LSP inline completions " .. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
 		vim.log.levels.INFO
 	)
 end, { desc = "LSP: Toggle AI Completions" })
