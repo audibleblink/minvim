@@ -1,5 +1,5 @@
----@diagnostic disable: missing-fields, param-type-mismatch, undefined-field
 -- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
+---@diagnostic disable: missing-fields, param-type-mismatch, undefined-field
 
 -- Plugin Init and Config {{{
 
@@ -854,42 +854,62 @@ end
 
 -- {{{ Options
 vim.cmd.colorscheme("catppuccin-macchiato")
-local opt = vim.opt
+
 local o = vim.o
 
-opt.autoread = true
-opt.colorcolumn = "100"
-opt.fillchars = { eob = " " }
-opt.guifont = "CodeliaLigatures Nerd Font"
-opt.scrolloff = 4
-opt.shortmess:append("sI")
-opt.swapfile = false
-opt.whichwrap:append("<>[]hl")
-opt.foldlevel = 99
-opt.foldlevelstart = 99
-
+-- o.foldlevel = 99
+-- o.foldlevelstart = 99
+-- o.foldmethod = "indent"
+o.autoindent = true
+o.autoread = true
+o.breakindent = true
+o.breakindentopt = "list:-1"
 o.clipboard = "unnamedplus"
+o.colorcolumn = "100"
+o.complete = ".,w,b,kspell"
+o.completeopt = "menuone,noselect,fuzzy,nosort"
 o.cursorline = true
-o.cursorlineopt = "both"
+o.cursorlineopt = "screenline,number"
+o.fillchars = "eob: ,fold:~"
+o.foldlevel = 10
+o.foldnestmax = 10
+o.foldtext = ""
+o.formatlistpat = [[^\s*[0-9\-\+\*]\+[\.\)]*\s\+]]
+o.formatoptions = "rqnl1j"
+o.guifont = "CodeliaLigatures Nerd Font"
 o.ignorecase = true
+o.incsearch = true
+o.infercase = true
+o.iskeyword = "@,48-57,_,192-255,-"
 o.laststatus = 3
+o.linebreak = true
+o.list = true
+o.listchars = "extends:…,nbsp:␣,precedes:…,tab:  "
 o.mouse = "a"
 o.number = true
+o.numberwidth = 1
+o.pumheight = 10
 o.relativenumber = true
+o.scrolloff = 4
+o.shortmess = "CFIOSWaco"
 o.showmode = false
+o.signcolumn = "yes"
 o.smartcase = true
+o.smartindent = true
+o.spelloptions = "camel"
 o.splitbelow = true
+o.splitkeep = "screen"
 o.splitright = true
 o.swapfile = false
+o.switchbuf = "usetab"
 o.tabstop = 4
 o.termguicolors = true
 o.timeoutlen = 500
 o.undofile = true
+o.virtualedit = "block"
 o.winborder = "rounded"
 o.wrap = false
--- Numbers
-o.number = true
-o.numberwidth = 2
+o.whichwrap = "<>[]hl,b,s"
 
 -- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
@@ -906,6 +926,38 @@ vim.diagnostic.config({
 	underline = true,
 	float = { border = "rounded", header = "Diagnostics" },
 })
+-- defer loading: `vim.diagnostic` - it's a relatively heavy module.
+vim.schedule(function()
+	vim.lsp.inlay_hint.enable()
+	vim.diagnostic.config({
+		update_in_insert = false,
+		signs = {
+			text = {
+				[vim.diagnostic.severity.ERROR] = "󰅙",
+				[vim.diagnostic.severity.WARN] = "",
+				[vim.diagnostic.severity.INFO] = "󰋼",
+				[vim.diagnostic.severity.HINT] = "󰌵",
+			},
+		},
+		virtual_text = { current_line = true, severity = { min = vim.diagnostic.severity.HINT } },
+		severity_sort = true,
+		underline = true,
+		float = { border = "rounded", header = "Diagnostics" },
+	})
+end)
+
+-- Create project-specific shada-files
+--
+o.shadafile = (function()
+	local git_root = vim.fs.root(0, ".git")
+	if not git_root then
+		return
+	end
+	local shadafile = vim.fs.joinpath(vim.fn.stdpath("state"), "_shada", vim.base64.encode(git_root))
+	vim.fn.mkdir(vim.fs.dirname(shadafile), "p")
+	return shadafile
+end)()
+
 -- }}} End Options
 
 -- {{{ AutoCommands
@@ -931,18 +983,6 @@ vim.api.nvim_create_user_command("MasonInstallAll", function()
 		end
 	end)
 end, {})
-
--- Create project-specific shada-files
---
-opt.shadafile = (function()
-	local git_root = vim.fs.root(0, ".git")
-	if not git_root then
-		return
-	end
-	local shadafile = vim.fs.joinpath(vim.fn.stdpath("state"), "_shada", vim.base64.encode(git_root))
-	vim.fn.mkdir(vim.fs.dirname(shadafile), "p")
-	return shadafile
-end)()
 
 -- highlight yanked text for 300ms using the "Visual" highlight group
 --
