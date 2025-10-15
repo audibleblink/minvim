@@ -60,6 +60,7 @@ require("blink.cmp").setup({
 		ghost_text = { enabled = false },
 	},
 	keymap = {
+		-- these are insert mode mappings
 		preset = "default",
 		["<C-l>"] = { "accept" },
 		["<Tab>"] = {
@@ -537,6 +538,7 @@ require("sidekick").setup({
 		},
 	},
 })
+
 vim.keymap.set("n", "<leader>ai", function()
 	require("sidekick.cli").toggle()
 end, { desc = "Sidekick: Toggle" })
@@ -544,13 +546,6 @@ end, { desc = "Sidekick: Toggle" })
 vim.keymap.set("n", "<leader>ap", function()
 	require("sidekick.cli").prompt()
 end, { desc = "Sidekick: Prompt" })
-
-vim.keymap.set({ "n", "x" }, "<tab>", function()
-	-- if there is a next edit, jump to it, otherwise apply it if any
-	if not require("sidekick").nes_jump_or_apply() then
-		return "<Tab>" -- fallback to normal tab
-	end
-end, { desc = "Sidekick: Next Edit", expr = true })
 
 vim.keymap.set({ "n", "x" }, "<leader>at", function()
 	require("sidekick.cli").send({ msg = "{this}" })
@@ -563,6 +558,19 @@ end, { desc = "Sidekick: Send File" })
 vim.keymap.set("x", "<leader>av", function()
 	require("sidekick.cli").send({ msg = "{selection}" })
 end, { desc = "Sidekick: Send Literal Selection" })
+
+vim.keymap.set("n", "<leader>an", function()
+	local nes = require("sidekick.nes")
+	nes.toggle()
+	vim.notify("NES is " .. (nes.enabled and "on" or "off"), vim.log.levels.INFO, { title = "Sidekick" })
+end, { desc = "Sidekick: Toggle NES" })
+
+vim.keymap.set({ "n", "x" }, "<tab>", function()
+	if not require("sidekick").nes_jump_or_apply() then
+		return "<Tab>" -- fallback to normal tab
+	end
+end, { desc = "Sidekick: Next Edit", expr = true })
+
 -- }}}
 
 -- snacks.nvim {{{
@@ -591,7 +599,7 @@ require("snacks").setup({
 				{ icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
 				{
 					icon = " ",
-					key = "d",
+					key = "c",
 					desc = "Config",
 					action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
 				},
@@ -884,12 +892,14 @@ o.numberwidth = 2
 -- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
 
+-- LSP and Diagnostics
+vim.highlight.priorities.semantic_tokens = 95 -- just below Treesitter
 vim.lsp.inlay_hint.enable()
 local x = vim.diagnostic.severity
 vim.diagnostic.config({
 	update_in_insert = false,
 	signs = { text = { [x.ERROR] = "󰅙", [x.WARN] = "", [x.INFO] = "󰋼", [x.HINT] = "󰌵" } },
-	virtual_text = { current_line = true, severity = { min = x.HINT } },
+	virtual_text = { prefix = "", current_line = true, severity = { min = x.HINT } },
 	severity_sort = true,
 	underline = true,
 	float = { border = "rounded", header = "Diagnostics" },
@@ -1107,8 +1117,7 @@ vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 vim.keymap.set("n", "<leader>ac", function()
 	vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
 	vim.notify(
-		"LSP inlay hints and inline completions "
-			.. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
+		"LSP completions " .. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
 		vim.log.levels.INFO
 	)
 end, { desc = "LSP: Toggle AI Completions" })
