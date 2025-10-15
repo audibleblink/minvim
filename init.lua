@@ -370,12 +370,19 @@ require("mini.clue").setup({
 	},
 })
 
--- require("mini.diff").setup({
--- 	view = {
--- 		style = "sign",
--- 		signs = { add = "┃", change = "┃", delete = "_" },
--- 	},
--- })
+require("mini.files").setup()
+-- Add bookmarks to every explorer.
+vim.api.nvim_create_autocmd("User", {
+	desc = "Add MiniFiles Bookmarks",
+	pattern = "MiniFilesExplorerOpen",
+	callback = function()
+		MiniFiles.set_bookmark("w", vim.fn.getcwd, { desc = "Working directory" })
+		MiniFiles.set_bookmark("c", vim.fn.stdpath("config"), { desc = "Config" })
+	end,
+})
+vim.keymap.set("n", "-", function()
+	require("mini.files").open(vim.api.nvim_buf_get_name(0), false)
+end, { desc = "MiniFiles: Open" })
 
 require("mini.indentscope").setup({
 	symbol = "┃",
@@ -391,10 +398,10 @@ require("mini.indentscope").setup({
 	},
 })
 
-local disabled = { "help", "terminal" }
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "*",
 	callback = function()
+		local disabled = { "help", "terminal" }
 		if disabled[vim.bo.filetype] ~= nil or vim.bo.buftype ~= "" then
 			vim.b.miniindentscope_disable = true
 		end
@@ -459,47 +466,6 @@ require("nvim-tmux-navigation").setup({
 })
 -- }}}
 
--- oil.nvim {{{
-require("oil").setup({
-	keymaps = {
-		["q"] = "actions.close",
-		["<esc>"] = "actions.close",
-	},
-
-	float = {
-		padding = 5,
-		border = "rounded",
-	},
-})
-vim.keymap.set("n", "<leader>o", ":Oil --float<CR>", { desc = "Oil: File Browser" })
-
--- }}}
-
--- origami.nvim {{{
--- require("origami").setup({
--- 	useLspFoldsWithTreesitterFallback = true,
--- 	pauseFoldsOnSearch = true,
--- 	foldtext = {
--- 		enabled = true,
--- 		padding = 3,
--- 		lineCount = {
--- 			template = "-- %d lines", -- `%d` is replaced with the number of folded lines
--- 			hlgroup = "Comment",
--- 		},
--- 		diagnosticsCount = true, -- uses hlgroups and icons from `vim.diagnostic.config().signs`
--- 		gitsignsCount = true, -- requires `gitsigns.nvim`
--- 	},
--- 	autoFold = {
--- 		enabled = true,
--- 		kinds = { "comment", "imports" }, ---@type lsp.FoldingRangeKind[]
--- 	},
--- 	foldKeymaps = {
--- 		setup = true, -- modifies `h`, `l`, and `$`
--- 		hOnlyOpensOnFirstColumn = false,
--- 	},
--- })
--- }}}
-
 -- render-markdown.nvim {{{
 require("render-markdown").setup({
 	completions = { lsp = { enabled = true } },
@@ -531,6 +497,9 @@ require("render-markdown").setup({
 
 -- sidekick.nvim {{{
 require("sidekick").setup({
+	nes = {
+		enabled = false,
+	},
 	cli = {
 		mux = {
 			backend = "tmux",
@@ -669,7 +638,7 @@ vim.keymap.set({ "n", "x" }, "ghx", require("snacks").gitbrowse.open, { desc = "
 
 -- }}}
 
--- {{{ tree-sitter
+-- tree-sitter {{{
 local ts_lang = {
 	-- web dev
 	"html",
@@ -789,7 +758,7 @@ require("undotree").setup()
 vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true, desc = "UndoTree" })
 -- }}}
 
--- {{{ LSP and Completion (Mason)
+-- LSP and Completion (Mason) {{{
 _G.debuggers = {
 	"delve",
 	"debugpy",
