@@ -43,11 +43,10 @@ vim.pack.add({
 -- auto-dark-mode {{{
 require("auto-dark-mode").setup({
 	set_dark_mode = function()
-		vim.api.nvim_set_option_value("background", "dark", {})
 		vim.cmd.colorscheme("catppuccin-macchiato")
 	end,
 	set_light_mode = function()
-		vim.api.nvim_set_option_value("background", "light", {})
+		vim.cmd.colorscheme("catppuccin-latte")
 	end,
 	update_interval = 500,
 	fallback = "dark",
@@ -951,6 +950,7 @@ o.shadafile = (function()
 	return shadafile
 end)()
 
+vim.cmd.colorscheme("catppuccin-macchiato")
 -- }}} End Options
 
 -- KeyMaps {{{
