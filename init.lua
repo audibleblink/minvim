@@ -30,6 +30,7 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
 	-- { src = "https://github.com/nvzone/floaterm" },
 	{ src = "https://github.com/audibleblink/floaterm", version = "feature/open" },
+	{ src = "https://github.com/rafamadriz/friendly-snippets" },
 	{ src = "https://github.com/saghen/blink.cmp", version = "v1.7.0" },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
@@ -65,8 +66,11 @@ require("blink.cmp").setup({
 			auto_show_delay_ms = 600,
 		},
 		menu = {
+			border = "solid",
+			scrollbar = false,
 			auto_show = true,
 			draw = {
+				treesitter = { "lsp" },
 				columns = {
 					{ "kind_icon" },
 					{ "label", "label_description", gap = 1 },
@@ -77,14 +81,22 @@ require("blink.cmp").setup({
 						text = function(ctx)
 							--- you can do this with a map.
 							if ctx.source_name == "LSP" then
-								return " "
+								return " "
 							elseif ctx.source_name == "Snippets" then
-								return "󰩫 "
+								return "󰞘 "
+							elseif ctx.source_name == "Buffer" then
+								return " "
 							end
 							return ctx.source_name
 						end,
 					},
 				},
+			},
+		},
+		list = {
+			selection = {
+				preselect = true,
+				auto_insert = false,
 			},
 		},
 		ghost_text = { enabled = false },
@@ -109,7 +121,12 @@ require("blink.cmp").setup({
 			end,
 		},
 	},
-	signature = { enabled = true },
+	signature = {
+		enabled = true,
+		window = {
+			border = "none",
+		},
+	},
 	snippets = {
 		preset = "mini_snippets",
 	},
@@ -915,7 +932,7 @@ o.termguicolors = true
 o.timeoutlen = 500
 o.undofile = true
 o.virtualedit = "block"
-o.winborder = "rounded"
+o.winborder = "solid"
 o.wrap = false
 o.whichwrap = "<>[]hl,b,s"
 
@@ -1054,7 +1071,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			virtual_text = { current_line = true, severity = { min = vim.diagnostic.severity.HINT } },
 			severity_sort = true,
 			underline = true,
-			float = { border = "rounded", header = "Diagnostics" },
+			float = { border = "solid", header = "Diagnostics" },
 		})
 	end,
 })
