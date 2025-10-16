@@ -3,7 +3,7 @@
 
 -- Plugin Init and Config {{{
 
--- Plugin Declaration {{{
+--- Plugin Declaration {{{
 vim.g.mapleader = " " -- ensure leader is set so subsequent mappings use it
 vim.cmd.packadd("nohlsearch")
 vim.pack.add({
@@ -29,7 +29,6 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-mini/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
-	-- { src = "https://github.com/nvzone/floaterm" },
 	{ src = "https://github.com/rafamadriz/friendly-snippets" },
 	{ src = "https://github.com/saghen/blink.cmp", version = vim.version.range("1.7") },
 	{ src = "https://github.com/stevearc/conform.nvim" },
@@ -38,9 +37,9 @@ vim.pack.add({
 	{ src = "https://github.com/jiaoshijie/undotree" },
 }, { load = true, confirm = false })
 
--- }}} End: Plugin Declaration
+--- }}} End: Plugin Declaration
 
--- auto-dark-mode {{{
+--- auto-dark-mode {{{
 require("auto-dark-mode").setup({
 	set_dark_mode = function()
 		vim.cmd.colorscheme("catppuccin-macchiato")
@@ -51,9 +50,9 @@ require("auto-dark-mode").setup({
 	update_interval = 500,
 	fallback = "dark",
 })
--- }}}
+--- }}}
 
--- blink.cmp {{{
+--- blink.cmp {{{
 require("blink.cmp").setup({
 	cmdline = {
 		keymap = { preset = "inherit" },
@@ -130,10 +129,9 @@ require("blink.cmp").setup({
 		preset = "mini_snippets",
 	},
 })
--- }}}
+--- }}}
 
--- conform.nvim {{{
--- TODO autoinstall the formatters with Mason
+--- conform.nvim {{{
 require("conform").setup({
 	formatters_by_ft = {
 		lua = { "stylua" },
@@ -154,9 +152,9 @@ vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 vim.keymap.set("n", "gm", function()
 	require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 10000 })
 end, { desc = "Format Files" })
--- }}}
+--- }}}
 
--- i3tab {{{
+--- i3tab {{{
 vim.api.nvim_create_autocmd("ColorScheme", {
 	callback = function()
 		require("i3tab").setup({
@@ -175,9 +173,9 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 		})
 	end,
 })
--- }}}
+--- }}}
 
--- floaterm {{{
+--- floaterm {{{
 require("floaterm").setup({
 	size = { h = 70, w = 80 },
 	mappings = {
@@ -203,9 +201,9 @@ vim.keymap.set("n", "ghl", function()
 	})
 end, { desc = "[Git] Floaterm: Log" })
 
--- }}}
+--- }}}
 
--- gitsigns.nvim {{{
+--- gitsigns.nvim {{{
 require("gitsigns").setup({
 	on_attach = function(bufnr)
 		local gitsigns = require("gitsigns")
@@ -285,9 +283,9 @@ require("gitsigns").setup({
 		map("n", "gss", "gsih", { desc = "[Git] Stage Hunk", remap = true })
 	end,
 })
--- }}}
+--- }}}
 
--- lazydev.nvim {{{
+--- lazydev.nvim {{{
 require("lazydev").setup({
 	library = {
 		{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
@@ -295,7 +293,7 @@ require("lazydev").setup({
 })
 --}}}
 
--- lualine.nvim {{{
+--- lualine.nvim {{{
 --
 require("lualine").setup({
 	options = {
@@ -355,9 +353,9 @@ require("lualine").setup({
 	inactive_winbar = {},
 	extensions = { "quickfix", "mason", "oil", "trouble" },
 })
--- }}}
+--- }}}
 
--- mini.nvim {{{
+--- mini.nvim {{{
 require("mini.align").setup()
 require("mini.bracketed").setup()
 require("mini.comment").setup()
@@ -421,7 +419,7 @@ require("mini.clue").setup({
 })
 
 require("mini.files").setup()
--- Add bookmarks to every explorer.
+--- Add bookmarks to every explorer.
 vim.api.nvim_create_autocmd("User", {
 	desc = "Add MiniFiles Bookmarks",
 	pattern = "MiniFilesExplorerOpen",
@@ -433,6 +431,20 @@ vim.api.nvim_create_autocmd("User", {
 vim.keymap.set("n", "-", function()
 	require("mini.files").open(vim.api.nvim_buf_get_name(0), false)
 end, { desc = "MiniFiles: Open" })
+
+require("mini.hipatterns").setup({
+	highlighters = {
+		fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+		hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
+		todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
+		note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
+		fold1 = { pattern = "%-%-().*(){{%{", group = "Function" },
+		fold2 = { pattern = "%-%-%-().*(){{%{", group = "NeogitBranch" },
+
+		-- Highlight hex color strings (`#xxxxxx`) using that color
+		hex_color = require("mini.hipatterns").gen_highlighter.hex_color(),
+	},
+})
 
 require("mini.indentscope").setup({
 	symbol = "┃",
@@ -466,9 +478,9 @@ require("mini.snippets").setup({
 	},
 })
 
--- }}}
+--- }}}
 
--- noice.nvim {{{
+--- noice.nvim {{{
 
 require("noice").setup({
 	lsp = {
@@ -507,9 +519,9 @@ require("noice").setup({
 	},
 })
 
--- }}}
+--- }}}
 
--- nvim-tmux-navigation {{{
+--- nvim-tmux-navigation {{{
 require("nvim-tmux-navigation").setup({
 	disable_when_zoomed = false,
 	keybindings = {
@@ -521,9 +533,9 @@ require("nvim-tmux-navigation").setup({
 		next = "<C-Space>",
 	},
 })
--- }}}
+--- }}}
 
--- render-markdown.nvim {{{
+--- render-markdown.nvim {{{
 require("render-markdown").setup({
 	completions = { lsp = { enabled = true } },
 	render_modes = true, -- Render in ALL modes
@@ -550,9 +562,9 @@ require("render-markdown").setup({
 		},
 	},
 })
--- }}}
+--- }}}
 
--- sidekick.nvim {{{
+--- sidekick.nvim {{{
 require("sidekick").setup({
 	nes = {
 		enabled = false,
@@ -597,9 +609,9 @@ vim.keymap.set({ "n", "x" }, "<tab>", function()
 	end
 end, { desc = "Sidekick: Next Edit", expr = true })
 
--- }}}
+--- }}}
 
--- snacks.nvim {{{
+--- snacks.nvim {{{
 require("snacks").setup({
 	picker = {
 		sources = {
@@ -693,9 +705,9 @@ vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: R
 vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
 vim.keymap.set({ "n", "x" }, "ghx", require("snacks").gitbrowse.open, { desc = "[Git] Open in web" })
 
--- }}}
+--- }}}
 
--- tree-sitter {{{
+--- tree-sitter {{{
 local ts_lang = {
 	-- web dev
 	"html",
@@ -736,9 +748,9 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.treesitter.start()
 	end,
 })
--- }}}
+--- }}}
 
--- trouble.nvim {{{
+--- trouble.nvim {{{
 require("trouble").setup({
 	icons = {
 		indent = {
@@ -808,14 +820,14 @@ end, { desc = "Diagnostic List (Trouble)" })
 vim.keymap.set("n", "<leader>xx", function()
 	trouble.toggle({ mode = "diagnostics", filter = { buf = 0 } })
 end, { desc = "Location List (Trouble)" })
--- }}}
+--- }}}
 
--- undotree {{{
+--- undotree {{{
 require("undotree").setup()
 vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true, desc = "UndoTree" })
--- }}}
+--- }}}
 
--- LSP and Completion (Mason) {{{
+--- LSP and Completion (Mason) {{{
 _G.debuggers = {
 	"delve",
 	"debugpy",
@@ -838,7 +850,7 @@ _G.lang_servers = {
 require("mason").setup({ max_concurrent_installers = 8 })
 require("mason-lspconfig").setup({ ensure_installed = _G.lang_servers })
 
--- Register completion capabilities universally
+--- Register completion capabilities universally
 vim.lsp.config("*", {
 	capabilities = require("blink.cmp").get_lsp_capabilities(),
 })
@@ -870,20 +882,20 @@ local custom = {
 for server, config in pairs(custom) do
 	vim.lsp.config(server, config)
 end
--- }}} End: LSP and Completion
+--- }}} End: LSP and Completion
 
 -- }}} End: Plugin Init and Config
 
 ---------------------------------------------------------------------------------------------------
 
---- Configs {{{
+-- Configs {{{
 
--- Options {{{
+--- Options {{{
 local o = vim.o
 
--- o.foldlevel = 99
--- o.foldlevelstart = 99
--- o.foldmethod = "indent"
+--- o.foldlevel = 99
+--- o.foldlevelstart = 99
+--- o.foldmethod = "indent"
 o.autoindent = true
 o.autoread = true
 o.breakindent = true
@@ -935,10 +947,10 @@ o.winborder = "solid"
 o.wrap = false
 o.whichwrap = "<>[]hl,b,s"
 
--- add binaries installed by mise
+--- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
 
--- Create project-specific shada-files
+--- Create project-specific shada-files
 --
 o.shadafile = (function()
 	local git_root = vim.fs.root(0, ".git")
@@ -951,15 +963,15 @@ o.shadafile = (function()
 end)()
 
 vim.cmd.colorscheme("catppuccin-macchiato")
--- }}} End Options
+--- }}} End Options
 
--- KeyMaps {{{
+--- KeyMaps {{{
 vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Join w/o cursor moving" })
 vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
 vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>", { desc = "Source current file" })
 vim.keymap.set("n", "<cr>", ":")
 
--- QoL
+--- QoL
 vim.keymap.set("n", "J", "mzJ`z", { desc = "Join w/o cursor moving" })
 vim.keymap.set("n", "<CR>", ":", { desc = "CMD enter command mode" })
 vim.keymap.set("n", "<leader><Tab>", "<cmd> b# <CR>", { desc = "Previous Buffer" })
@@ -978,34 +990,34 @@ vim.keymap.set("n", "qa", function()
 	} }, "a")
 end, { desc = "Add current file to QuickFix" })
 
--- Line numbers
+--- Line numbers
 vim.keymap.set("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "Toggle Line number" })
 vim.keymap.set("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "Toggle Relative number" })
 
--- Window management
+--- Window management
 vim.keymap.set("n", "<leader>zi", "<cmd> wincmd | <CR>:wincmd _ <CR>", { desc = "Zoom Pane" })
 vim.keymap.set("n", "<leader>zo", "<cmd> wincmd = <CR>", { desc = "Reset Zoom" })
 
--- Highlight Searching
+--- Highlight Searching
 vim.keymap.set("n", "c*", "*Ncgn", { desc = "Search and Replace 1x1" })
 vim.keymap.set("v", "<C-r>", 'y:%s/<C-r>"//gc<left><left><left>', { desc = "Insert highlight as search string" })
 
--- Resize w/ Shift + Arrow Keys
+--- Resize w/ Shift + Arrow Keys
 vim.keymap.set("n", "<S-Up>", "<cmd>resize +2<CR>") -- Increase height
 vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<CR>") -- Decrease height
 vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase width
 vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>") -- Decrease width
 
--- Smart highlight cancelling
+--- Smart highlight cancelling
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
 ------------------------------------ Brace Match ---------------------------------------
--- NOTE custom objects config'd in mini.ai plugin
+--- NOTE custom objects config'd in mini.ai plugin
 vim.keymap.set("n", "mm", "%")
--- Selects until matching pair, ex: `vm`
+--- Selects until matching pair, ex: `vm`
 vim.keymap.set("x", "m", "%")
--- Use with operators, ex: `dm` - delete until matching pair
+--- Use with operators, ex: `dm` - delete until matching pair
 vim.keymap.set("o", "m", "%")
 
 -------------------------------------- Tabline -----------------------------------------
@@ -1013,11 +1025,11 @@ vim.keymap.set("n", "]t", ":tabnext<CR>", { desc = "Next tab", silent = true })
 vim.keymap.set("n", "[t", ":tabprevious<CR>", { desc = "Previous tab", silent = true })
 
 -------------------------------------- Terminal -----------------------------------------
--- Terminal mode escape
+--- Terminal mode escape
 --
 vim.keymap.set("t", "<C-g>", "<C-\\><C-N>", { desc = "Terminal Escape terminal mode" })
 
--- Terminal Navigation
+--- Terminal Navigation
 local function navigate_from_terminal(direction)
 	return "<C-\\><C-N><C-w>" .. direction
 end
@@ -1027,9 +1039,9 @@ vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
 vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
 vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 
--- }}}
+--- }}}
 
--- AutoCommands {{{
+--- AutoCommands {{{
 
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	desc = "Mapping for init.lua",
@@ -1098,7 +1110,7 @@ vim.api.nvim_create_user_command("MasonInstallAll", function()
 	end)
 end, {})
 
--- highlight yanked text for 300ms using the "Visual" highlight group
+--- highlight yanked text for 300ms using the "Visual" highlight group
 --
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
@@ -1108,7 +1120,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
--- Reload files if changed externally
+--- Reload files if changed externally
 --
 vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
 	desc = "Reload files if changed externally",
@@ -1116,7 +1128,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGai
 	pattern = { "*" },
 })
 
--- show cursor line only in active window
+--- show cursor line only in active window
 --
 vim.api.nvim_create_autocmd({ "InsertLeave", "WinEnter" }, {
 	desc = "Show cursor line only in active window",
@@ -1137,7 +1149,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave" }, {
 	end,
 })
 
--- More specific autocmd that only triggers on window focus
+--- More specific autocmd that only triggers on window focus
 --
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	desc = "Set up quickfix window keybindings",
@@ -1162,7 +1174,7 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	end,
 })
 
--- Enter insert mode when focusing terminal
+--- Enter insert mode when focusing terminal
 --
 vim.api.nvim_create_autocmd("WinEnter", {
 	desc = "Enter insert mode when focusing terminal",
@@ -1175,7 +1187,7 @@ vim.api.nvim_create_autocmd("WinEnter", {
 	end,
 })
 
--- Git commit within current session
+--- Git commit within current session
 --
 vim.api.nvim_create_user_command("Commit", function()
 	-- This causes git to create COMMIT_EDITMSG but not complete the commit
@@ -1193,6 +1205,6 @@ vim.api.nvim_create_user_command("Commit", function()
 	})
 end, {})
 vim.keymap.set("n", "ghc", vim.cmd.Commit, { desc = "Git Commit" })
--- }}}
+--- }}}
 
 -- }}} End: Configs
