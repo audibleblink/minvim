@@ -665,6 +665,8 @@ vim.keymap.set("n", "<leader>fpa", function()
 end, { desc = "Snacks: Grep Plugins" })
 vim.keymap.set("n", "<leader><Space>", Snacks.picker.resume, { desc = "Snacks: Resume" })
 vim.keymap.set("n", "<leader>fh", Snacks.picker.help, { desc = "Snacks: Help" })
+vim.keymap.set({ "n", "x" }, "ghx", require("snacks").gitbrowse.open, { desc = "[Git] Open in web" })
+
 -- }}}
 
 -- {{{ tree-sitter
