@@ -1,6 +1,330 @@
 -- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
 ---@diagnostic disable: missing-fields, param-type-mismatch, undefined-field
 
+---{{{ Configs
+
+-- {{{ Options
+local o = vim.o
+
+-- o.foldlevel = 99
+-- o.foldlevelstart = 99
+-- o.foldmethod = "indent"
+o.autoindent = true
+o.autoread = true
+o.breakindent = true
+o.breakindentopt = "list:-1"
+o.clipboard = "unnamedplus"
+o.colorcolumn = "100"
+o.complete = ".,w,b,kspell"
+o.completeopt = "menuone,noselect,fuzzy,nosort"
+o.cursorline = true
+o.cursorlineopt = "screenline,number"
+o.fillchars = "eob: ,fold:"
+o.foldlevel = 10
+o.foldnestmax = 10
+o.foldtext = ""
+o.formatlistpat = [[^\s*[0-9\-\+\*]\+[\.\)]*\s\+]]
+o.formatoptions = "rqnl1j"
+o.guifont = "CodeliaLigatures Nerd Font"
+o.ignorecase = true
+o.incsearch = true
+o.infercase = true
+o.iskeyword = "@,48-57,_,192-255,-"
+o.laststatus = 3
+o.linebreak = true
+o.list = true
+o.listchars = "extends:…,nbsp:␣,precedes:…,tab:  "
+o.mouse = "a"
+o.number = true
+o.numberwidth = 1
+o.pumheight = 10
+o.relativenumber = true
+o.scrolloff = 4
+o.shortmess = "CFIOSWaco"
+o.showmode = false
+o.signcolumn = "yes"
+o.smartcase = true
+o.smartindent = true
+o.spelloptions = "camel"
+o.splitbelow = true
+o.splitkeep = "screen"
+o.splitright = true
+o.swapfile = false
+o.switchbuf = "usetab"
+o.tabstop = 4
+o.termguicolors = true
+o.timeoutlen = 500
+o.undofile = true
+o.virtualedit = "block"
+o.winborder = "rounded"
+o.wrap = false
+o.whichwrap = "<>[]hl,b,s"
+
+-- add binaries installed by mise
+vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
+
+-- LSP and Diagnostics
+vim.highlight.priorities.semantic_tokens = 95 -- just below Treesitter
+vim.lsp.inlay_hint.enable()
+local x = vim.diagnostic.severity
+vim.diagnostic.config({
+	update_in_insert = false,
+	signs = { text = { [x.ERROR] = "󰅙", [x.WARN] = "", [x.INFO] = "󰋼", [x.HINT] = "󰌵" } },
+	virtual_text = { prefix = "", current_line = true, severity = { min = x.HINT } },
+	severity_sort = true,
+	underline = true,
+	float = { border = "rounded", header = "Diagnostics" },
+})
+
+-- defer loading: `vim.diagnostic` - it's a relatively heavy module.
+vim.schedule(function()
+	vim.lsp.inlay_hint.enable()
+	vim.diagnostic.config({
+		update_in_insert = false,
+		signs = {
+			text = {
+				[vim.diagnostic.severity.ERROR] = "󰅙",
+				[vim.diagnostic.severity.WARN] = "",
+				[vim.diagnostic.severity.INFO] = "󰋼",
+				[vim.diagnostic.severity.HINT] = "󰌵",
+			},
+		},
+		virtual_text = { current_line = true, severity = { min = vim.diagnostic.severity.HINT } },
+		severity_sort = true,
+		underline = true,
+		float = { border = "rounded", header = "Diagnostics" },
+	})
+end)
+
+-- Create project-specific shada-files
+--
+o.shadafile = (function()
+	local git_root = vim.fs.root(0, ".git")
+	if not git_root then
+		return
+	end
+	local shadafile = vim.fs.joinpath(vim.fn.stdpath("state"), "_shada", vim.base64.encode(git_root))
+	vim.fn.mkdir(vim.fs.dirname(shadafile), "p")
+	return shadafile
+end)()
+
+-- }}} End Options
+
+-- {{{ AutoCommands
+
+vim.api.nvim_create_autocmd("LspAttach", {
+	desc = "Run after LSP attaches",
+	callback = function()
+		-- Toggle LSP inline completions and notify of status
+		vim.keymap.set("n", "<leader>ac", function()
+			vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
+			vim.notify(
+				"LSP inline completions " .. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
+				vim.log.levels.INFO
+			)
+		end, { desc = "LSP: Toggle AI Completions" })
+	end,
+})
+
+vim.api.nvim_create_user_command("MasonInstallAll", function()
+	local mason_packages = {}
+	vim.list_extend(mason_packages, _G.debuggers)
+	for _, v in ipairs(require("conform").list_all_formatters()) do
+		local fmts = vim.split(v.name:gsub(",", ""), "%s+")
+		vim.list_extend(mason_packages, fmts)
+	end
+
+	vim.cmd("Mason")
+	local mr = require("mason-registry")
+	mr.refresh(function()
+		for _, tool in ipairs(mason_packages) do
+			local pkg = { name = tool, version = nil }
+			local p = mr.get_package(pkg.name)
+
+			if not p:is_installed() then
+				p:install({ version = pkg.version })
+			end
+		end
+	end)
+end, {})
+
+-- highlight yanked text for 300ms using the "Visual" highlight group
+--
+vim.api.nvim_create_autocmd("TextYankPost", {
+	desc = "Highlight when yanking (copying) text",
+	group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+	callback = function()
+		vim.hl.on_yank()
+	end,
+})
+
+-- Reload files if changed externally
+--
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+	desc = "Reload files if changed externally",
+	command = "if mode() != 'c' | checktime | endif",
+	pattern = { "*" },
+})
+
+-- show cursor line only in active window
+--
+vim.api.nvim_create_autocmd({ "InsertLeave", "WinEnter" }, {
+	desc = "Show cursor line only in active window",
+	callback = function()
+		if vim.w.auto_cursorline then
+			vim.wo.cursorline = true
+			vim.w.auto_cursorline = nil
+		end
+	end,
+})
+vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave" }, {
+	desc = "Hide cursor line when leaving insert mode or window",
+	callback = function()
+		if vim.wo.cursorline then
+			vim.w.auto_cursorline = true
+			vim.wo.cursorline = false
+		end
+	end,
+})
+
+-- More specific autocmd that only triggers on window focus
+--
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	desc = "Set up quickfix window keybindings",
+	pattern = "*",
+	group = vim.api.nvim_create_augroup("qf", { clear = true }),
+	callback = function()
+		if vim.bo.buftype == "quickfix" then
+			vim.keymap.set("n", "qc", ":ccl<cr>", { buffer = true })
+			vim.keymap.set("n", "<cr>", "<cr>", { buffer = true })
+
+			vim.keymap.set("n", "1", "1G<cr>:ccl<cr>", { buffer = true })
+			vim.keymap.set("n", "2", "2G<cr>:ccl<cr>", { buffer = true })
+			vim.keymap.set("n", "3", "3G<cr>:ccl<cr>", { buffer = true })
+			vim.keymap.set("n", "4", "4G<cr>:ccl<cr>", { buffer = true })
+
+			vim.keymap.set("n", "dd", function()
+				local qflist = vim.fn.getqflist()
+				table.remove(qflist, vim.fn.line("."))
+				vim.fn.setqflist(qflist, "r")
+			end, { buffer = true })
+		end
+	end,
+})
+
+-- Enter insert mode when focusing terminal
+--
+vim.api.nvim_create_autocmd("WinEnter", {
+	desc = "Enter insert mode when focusing terminal",
+	pattern = "*",
+	group = vim.api.nvim_create_augroup("term_insert", { clear = true }),
+	callback = function()
+		if vim.bo.buftype == "terminal" then
+			vim.cmd("startinsert")
+		end
+	end,
+})
+
+-- Git commit within current session
+--
+vim.api.nvim_create_user_command("Commit", function()
+	-- This causes git to create COMMIT_EDITMSG but not complete the commit
+	vim.fn.system("GIT_EDITOR=true git commit -v")
+	local git_dir = vim.fn.system("git rev-parse --git-dir"):gsub("\n", "")
+	vim.cmd("tabedit! " .. git_dir .. "/COMMIT_EDITMSG")
+
+	vim.api.nvim_create_autocmd("BufWritePost", {
+		desc = "Execute git commit",
+		pattern = "COMMIT_EDITMSG",
+		once = true,
+		callback = function()
+			vim.fn.system("git commit -F " .. vim.fn.expand("%:p"))
+		end,
+	})
+end, {})
+vim.keymap.set("n", "ghc", vim.cmd.Commit, { desc = "Git Commit" })
+-- }}} End: AutoCommands
+
+-- {{{ Neovim Mappings
+vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Join w/o cursor moving" })
+vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
+vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>", { desc = "Source current file" })
+vim.keymap.set("n", "<cr>", ":")
+
+-- QoL
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Join w/o cursor moving" })
+vim.keymap.set("n", "<CR>", ":", { desc = "CMD enter command mode" })
+vim.keymap.set("n", "<leader><Tab>", "<cmd> b# <CR>", { desc = "Previous Buffer" })
+vim.keymap.set("n", "<left>", "0", { desc = "Jump: Start of line" })
+vim.keymap.set("n", "<right>", "$", { desc = "Jump: End of line" })
+
+vim.keymap.set("n", "q", "", { desc = "Unassing q key" })
+vim.keymap.set("n", "\\", "q", { desc = "Macros" })
+vim.keymap.set("n", "qo", "<cmd>copen<CR>", { desc = "Open QuickFix" })
+vim.keymap.set("n", "qa", function()
+	vim.fn.setqflist({ {
+		filename = vim.fn.expand("%"),
+		lnum = 1,
+		col = 1,
+		text = vim.fn.expand("%"),
+	} }, "a")
+end, { desc = "Add current file to QuickFix" })
+
+-- Line numbers
+vim.keymap.set("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "Toggle Line number" })
+vim.keymap.set("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "Toggle Relative number" })
+
+-- Window management
+vim.keymap.set("n", "<leader>zi", "<cmd> wincmd | <CR>:wincmd _ <CR>", { desc = "Zoom Pane" })
+vim.keymap.set("n", "<leader>zo", "<cmd> wincmd = <CR>", { desc = "Reset Zoom" })
+
+-- Highlight Searching
+vim.keymap.set("n", "c*", "*Ncgn", { desc = "Search and Replace 1x1" })
+vim.keymap.set("v", "<C-r>", 'y:%s/<C-r>"//gc<left><left><left>', { desc = "Insert highlight as search string" })
+
+-- Resize w/ Shift + Arrow Keys
+vim.keymap.set("n", "<S-Up>", "<cmd>resize +2<CR>") -- Increase height
+vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<CR>") -- Decrease height
+vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase width
+vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>") -- Decrease width
+
+-- Smart highlight cancelling
+vim.keymap.set("n", "n", "nzzzv")
+vim.keymap.set("n", "N", "Nzzzv")
+
+------------------------------------ Brace Match ---------------------------------------
+-- NOTE custom objects config'd in mini.ai plugin
+vim.keymap.set("n", "mm", "%")
+-- Selects until matching pair, ex: `vm`
+vim.keymap.set("x", "m", "%")
+-- Use with operators, ex: `dm` - delete until matching pair
+vim.keymap.set("o", "m", "%")
+
+-------------------------------------- Tabline -----------------------------------------
+vim.keymap.set("n", "]t", ":tabnext<CR>", { desc = "Next tab", silent = true })
+vim.keymap.set("n", "[t", ":tabprevious<CR>", { desc = "Previous tab", silent = true })
+
+-------------------------------------- Terminal -----------------------------------------
+-- Terminal mode escape
+--
+vim.keymap.set("t", "<C-g>", "<C-\\><C-N>", { desc = "Terminal Escape terminal mode" })
+
+-- Terminal Navigation
+local function navigate_from_terminal(direction)
+	return "<C-\\><C-N><C-w>" .. direction
+end
+
+vim.keymap.set("t", "<C-h>", navigate_from_terminal("h"))
+vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
+vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
+vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
+
+-- }}} End Mappings
+
+-- }}} End: Configs
+
+---------------------------------------------------------------------------------------------------
+
 -- Plugin Init and Config {{{
 
 -- Plugin Declaration {{{
@@ -36,6 +360,7 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
 	{ src = "https://github.com/jiaoshijie/undotree" },
 }, { load = true, confirm = false })
+
 -- }}} End: Plugin Declaration
 
 -- auto-dark-mode {{{
@@ -848,328 +1173,4 @@ end
 
 -- }}} End: Plugin Init and Config
 
----------------------------------------------------------------------------------------------------
-
----{{{ Configs
-
--- {{{ Options
 vim.cmd.colorscheme("catppuccin-macchiato")
-
-local o = vim.o
-
--- o.foldlevel = 99
--- o.foldlevelstart = 99
--- o.foldmethod = "indent"
-o.autoindent = true
-o.autoread = true
-o.breakindent = true
-o.breakindentopt = "list:-1"
-o.clipboard = "unnamedplus"
-o.colorcolumn = "100"
-o.complete = ".,w,b,kspell"
-o.completeopt = "menuone,noselect,fuzzy,nosort"
-o.cursorline = true
-o.cursorlineopt = "screenline,number"
-o.fillchars = "eob: ,fold:"
-o.foldlevel = 10
-o.foldnestmax = 10
-o.foldtext = ""
-o.formatlistpat = [[^\s*[0-9\-\+\*]\+[\.\)]*\s\+]]
-o.formatoptions = "rqnl1j"
-o.guifont = "CodeliaLigatures Nerd Font"
-o.ignorecase = true
-o.incsearch = true
-o.infercase = true
-o.iskeyword = "@,48-57,_,192-255,-"
-o.laststatus = 3
-o.linebreak = true
-o.list = true
-o.listchars = "extends:…,nbsp:␣,precedes:…,tab:  "
-o.mouse = "a"
-o.number = true
-o.numberwidth = 1
-o.pumheight = 10
-o.relativenumber = true
-o.scrolloff = 4
-o.shortmess = "CFIOSWaco"
-o.showmode = false
-o.signcolumn = "yes"
-o.smartcase = true
-o.smartindent = true
-o.spelloptions = "camel"
-o.splitbelow = true
-o.splitkeep = "screen"
-o.splitright = true
-o.swapfile = false
-o.switchbuf = "usetab"
-o.tabstop = 4
-o.termguicolors = true
-o.timeoutlen = 500
-o.undofile = true
-o.virtualedit = "block"
-o.winborder = "rounded"
-o.wrap = false
-o.whichwrap = "<>[]hl,b,s"
-
--- add binaries installed by mise
-vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
-
--- LSP and Diagnostics
-vim.highlight.priorities.semantic_tokens = 95 -- just below Treesitter
-vim.lsp.inlay_hint.enable()
-local x = vim.diagnostic.severity
-vim.diagnostic.config({
-	update_in_insert = false,
-	signs = { text = { [x.ERROR] = "󰅙", [x.WARN] = "", [x.INFO] = "󰋼", [x.HINT] = "󰌵" } },
-	virtual_text = { prefix = "", current_line = true, severity = { min = x.HINT } },
-	severity_sort = true,
-	underline = true,
-	float = { border = "rounded", header = "Diagnostics" },
-})
--- defer loading: `vim.diagnostic` - it's a relatively heavy module.
-vim.schedule(function()
-	vim.lsp.inlay_hint.enable()
-	vim.diagnostic.config({
-		update_in_insert = false,
-		signs = {
-			text = {
-				[vim.diagnostic.severity.ERROR] = "󰅙",
-				[vim.diagnostic.severity.WARN] = "",
-				[vim.diagnostic.severity.INFO] = "󰋼",
-				[vim.diagnostic.severity.HINT] = "󰌵",
-			},
-		},
-		virtual_text = { current_line = true, severity = { min = vim.diagnostic.severity.HINT } },
-		severity_sort = true,
-		underline = true,
-		float = { border = "rounded", header = "Diagnostics" },
-	})
-end)
-
--- Create project-specific shada-files
---
-o.shadafile = (function()
-	local git_root = vim.fs.root(0, ".git")
-	if not git_root then
-		return
-	end
-	local shadafile = vim.fs.joinpath(vim.fn.stdpath("state"), "_shada", vim.base64.encode(git_root))
-	vim.fn.mkdir(vim.fs.dirname(shadafile), "p")
-	return shadafile
-end)()
-
--- }}} End Options
-
--- {{{ AutoCommands
-
-vim.api.nvim_create_user_command("MasonInstallAll", function()
-	local mason_packages = {}
-	vim.list_extend(mason_packages, _G.debuggers)
-	for _, v in ipairs(require("conform").list_all_formatters()) do
-		local fmts = vim.split(v.name:gsub(",", ""), "%s+")
-		vim.list_extend(mason_packages, fmts)
-	end
-
-	vim.cmd("Mason")
-	local mr = require("mason-registry")
-	mr.refresh(function()
-		for _, tool in ipairs(mason_packages) do
-			local pkg = { name = tool, version = nil }
-			local p = mr.get_package(pkg.name)
-
-			if not p:is_installed() then
-				p:install({ version = pkg.version })
-			end
-		end
-	end)
-end, {})
-
--- highlight yanked text for 300ms using the "Visual" highlight group
---
-vim.api.nvim_create_autocmd("TextYankPost", {
-	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
-	callback = function()
-		vim.hl.on_yank()
-	end,
-})
-
--- Reload files if changed externally
---
-vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
-	desc = "Reload files if changed externally",
-	command = "if mode() != 'c' | checktime | endif",
-	pattern = { "*" },
-})
-
--- show cursor line only in active window
---
-vim.api.nvim_create_autocmd({ "InsertLeave", "WinEnter" }, {
-	desc = "Show cursor line only in active window",
-	callback = function()
-		if vim.w.auto_cursorline then
-			vim.wo.cursorline = true
-			vim.w.auto_cursorline = nil
-		end
-	end,
-})
-vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave" }, {
-	desc = "Hide cursor line when leaving insert mode or window",
-	callback = function()
-		if vim.wo.cursorline then
-			vim.w.auto_cursorline = true
-			vim.wo.cursorline = false
-		end
-	end,
-})
-
--- More specific autocmd that only triggers on window focus
---
-vim.api.nvim_create_autocmd("BufWinEnter", {
-	desc = "Set up quickfix window keybindings",
-	pattern = "*",
-	group = vim.api.nvim_create_augroup("qf", { clear = true }),
-	callback = function()
-		if vim.bo.buftype == "quickfix" then
-			vim.keymap.set("n", "qc", ":ccl<cr>", { buffer = true })
-			vim.keymap.set("n", "<cr>", "<cr>", { buffer = true })
-
-			vim.keymap.set("n", "1", "1G<cr>:ccl<cr>", { buffer = true })
-			vim.keymap.set("n", "2", "2G<cr>:ccl<cr>", { buffer = true })
-			vim.keymap.set("n", "3", "3G<cr>:ccl<cr>", { buffer = true })
-			vim.keymap.set("n", "4", "4G<cr>:ccl<cr>", { buffer = true })
-
-			vim.keymap.set("n", "dd", function()
-				local qflist = vim.fn.getqflist()
-				table.remove(qflist, vim.fn.line("."))
-				vim.fn.setqflist(qflist, "r")
-			end, { buffer = true })
-		end
-	end,
-})
-
--- Enter insert mode when focusing terminal
---
-vim.api.nvim_create_autocmd("WinEnter", {
-	desc = "Enter insert mode when focusing terminal",
-	pattern = "*",
-	group = vim.api.nvim_create_augroup("term_insert", { clear = true }),
-	callback = function()
-		if vim.bo.buftype == "terminal" then
-			vim.cmd("startinsert")
-		end
-	end,
-})
-
--- Git commit within current session
---
-vim.api.nvim_create_user_command("Commit", function()
-	-- This causes git to create COMMIT_EDITMSG but not complete the commit
-	vim.fn.system("GIT_EDITOR=true git commit -v")
-	local git_dir = vim.fn.system("git rev-parse --git-dir"):gsub("\n", "")
-	vim.cmd("tabedit! " .. git_dir .. "/COMMIT_EDITMSG")
-
-	vim.api.nvim_create_autocmd("BufWritePost", {
-		desc = "Execute git commit",
-		pattern = "COMMIT_EDITMSG",
-		once = true,
-		callback = function()
-			vim.fn.system("git commit -F " .. vim.fn.expand("%:p"))
-		end,
-	})
-end, {})
-vim.keymap.set("n", "ghc", vim.cmd.Commit, { desc = "Git Commit" })
--- }}} End: AutoCommands
-
--- {{{ Neovim Mappings
-vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Join w/o cursor moving" })
-vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
-vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>", { desc = "Source current file" })
-vim.keymap.set("n", "<cr>", ":")
-
--- QoL
-vim.keymap.set("n", "J", "mzJ`z", { desc = "Join w/o cursor moving" })
-vim.keymap.set("n", "<CR>", ":", { desc = "CMD enter command mode" })
-vim.keymap.set("n", "<leader><Tab>", "<cmd> b# <CR>", { desc = "Previous Buffer" })
-vim.keymap.set("n", "<left>", "0", { desc = "Jump: Start of line" })
-vim.keymap.set("n", "<right>", "$", { desc = "Jump: End of line" })
-
-vim.keymap.set("n", "q", "", { desc = "Unassing q key" })
-vim.keymap.set("n", "\\", "q", { desc = "Macros" })
-vim.keymap.set("n", "qo", "<cmd>copen<CR>", { desc = "Open QuickFix" })
-vim.keymap.set("n", "qa", function()
-	vim.fn.setqflist({ {
-		filename = vim.fn.expand("%"),
-		lnum = 1,
-		col = 1,
-		text = vim.fn.expand("%"),
-	} }, "a")
-end, { desc = "Add current file to QuickFix" })
-
--- Line numbers
-vim.keymap.set("n", "<leader>n", "<cmd>set nu!<CR>", { desc = "Toggle Line number" })
-vim.keymap.set("n", "<leader>rn", "<cmd>set rnu!<CR>", { desc = "Toggle Relative number" })
-
--- Window management
-vim.keymap.set("n", "<leader>zi", "<cmd> wincmd | <CR>:wincmd _ <CR>", { desc = "Zoom Pane" })
-vim.keymap.set("n", "<leader>zo", "<cmd> wincmd = <CR>", { desc = "Reset Zoom" })
-
--- Highlight Searching
-vim.keymap.set("n", "c*", "*Ncgn", { desc = "Search and Replace 1x1" })
-vim.keymap.set("v", "<C-r>", 'y:%s/<C-r>"//gc<left><left><left>', { desc = "Insert highlight as search string" })
-
--- Resize w/ Shift + Arrow Keys
-vim.keymap.set("n", "<S-Up>", "<cmd>resize +2<CR>") -- Increase height
-vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<CR>") -- Decrease height
-vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +5<CR>") -- Increase width
-vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -5<CR>") -- Decrease width
-
--- Smart highlight cancelling
-vim.keymap.set("n", "n", "nzzzv")
-vim.keymap.set("n", "N", "Nzzzv")
-
------------------------------------- Brace Match ---------------------------------------
--- NOTE custom objects config'd in mini.ai plugin
-vim.keymap.set("n", "mm", "%")
--- Selects until matching pair, ex: `vm`
-vim.keymap.set("x", "m", "%")
--- Use with operators, ex: `dm` - delete until matching pair
-vim.keymap.set("o", "m", "%")
-
--------------------------------------- Tabline -----------------------------------------
-vim.keymap.set("n", "]t", ":tabnext<CR>", { desc = "Next tab", silent = true })
-vim.keymap.set("n", "[t", ":tabprevious<CR>", { desc = "Previous tab", silent = true })
-
--------------------------------------- Terminal -----------------------------------------
--- Terminal mode escape
---
-vim.keymap.set("t", "<C-g>", "<C-\\><C-N>", { desc = "Terminal Escape terminal mode" })
-
--- Terminal Navigation
-local function navigate_from_terminal(direction)
-	return "<C-\\><C-N><C-w>" .. direction
-end
-
-vim.keymap.set("t", "<C-h>", navigate_from_terminal("h"))
-vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
-vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
-vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
-
--- Toggle LSP inlay hints and inline completions and notify of status
-vim.keymap.set("n", "<leader>an", function()
-	local nes = require("sidekick.nes")
-	nes.enable(not nes.enabled)
-	vim.notify("Sidekick NES " .. (nes.enabled and "enabled" or "disabled"), vim.log.levels.INFO)
-end, { desc = "Sidekick: Toggle NES" })
-
-vim.keymap.set("n", "<leader>ac", function()
-	vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
-	vim.notify(
-		"LSP inline completions " .. (vim.lsp.inline_completion.is_enabled() and "enabled" or "disabled"),
-		vim.log.levels.INFO
-	)
-end, { desc = "LSP: Toggle AI Completions" })
-
--- }}} End Mappings
-
--- }}} End: Configs
