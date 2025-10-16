@@ -12,6 +12,7 @@ vim.pack.add({
 	{ src = "https://github.com/nvzone/volt" },
 	-- Core
 	{ src = "https://github.com/audibleblink/i3tab.nvim" },
+	{ src = "https://github.com/audibleblink/floaterm" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 	{ src = "https://github.com/catppuccin/nvim" },
 	{ src = "https://github.com/f-person/auto-dark-mode.nvim" },
@@ -29,9 +30,8 @@ vim.pack.add({
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
 	-- { src = "https://github.com/nvzone/floaterm" },
-	{ src = "https://github.com/audibleblink/floaterm", version = "feature/open" },
 	{ src = "https://github.com/rafamadriz/friendly-snippets" },
-	{ src = "https://github.com/saghen/blink.cmp", version = "v1.7.0" },
+	{ src = "https://github.com/saghen/blink.cmp", version = vim.version.range("1.7") },
 	{ src = "https://github.com/stevearc/conform.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/nvim-lualine/lualine.nvim" },
