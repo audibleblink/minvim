@@ -14,7 +14,6 @@ vim.pack.add({
 	{ src = "https://github.com/audibleblink/i3tab.nvim" },
 	{ src = "https://github.com/alexghergh/nvim-tmux-navigation" },
 	{ src = "https://github.com/catppuccin/nvim" },
-	{ src = "https://github.com/chrisgrieser/nvim-origami" },
 	{ src = "https://github.com/f-person/auto-dark-mode.nvim" },
 	{ src = "https://github.com/folke/lazydev.nvim" },
 	{ src = "https://github.com/folke/noice.nvim" },
@@ -55,8 +54,33 @@ require("auto-dark-mode").setup({
 
 -- blink.cmp {{{
 require("blink.cmp").setup({
+	snippets = {
+		preset = "mini_snippets",
+	},
 	completion = {
-		menu = { auto_show = false },
+		menu = {
+			auto_show = true,
+			draw = {
+				columns = {
+					{ "kind_icon" },
+					{ "label", "label_description", gap = 1 },
+					{ "source_name" },
+				},
+				components = {
+					source_name = {
+						text = function(ctx)
+							--- you can do this with a map.
+							if ctx.source_name == "LSP" then
+								return " "
+							elseif ctx.source_name == "Snippets" then
+								return "󰩫 "
+							end
+							return ctx.source_name
+						end,
+					},
+				},
+			},
+		},
 		ghost_text = { enabled = false },
 	},
 	keymap = {
@@ -409,6 +433,13 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.cmd([[highlight! link MiniIndentscopeSymbol Identifier]])
+
+require("mini.snippets").setup({
+	snippets = {
+		require("mini.snippets").gen_loader.from_lang(),
+	},
+})
+
 -- }}}
 
 -- noice.nvim {{{
@@ -839,7 +870,7 @@ o.complete = ".,w,b,kspell"
 o.completeopt = "menuone,noselect,fuzzy,nosort"
 o.cursorline = true
 o.cursorlineopt = "screenline,number"
-o.fillchars = "eob: ,fold:~"
+o.fillchars = "eob: ,fold:"
 o.foldlevel = 10
 o.foldnestmax = 10
 o.foldtext = ""
