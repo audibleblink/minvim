@@ -821,7 +821,7 @@ require("undotree").setup()
 vim.keymap.set("n", "<leader>u", require("undotree").toggle, { noremap = true, silent = true, desc = "UndoTree" })
 --- }}}
 
---- LSP and Completion (Mason) {{{
+--- LSP Servers and Configs {{{
 _G.debuggers = {
 	"delve",
 	"debugpy",
@@ -868,7 +868,7 @@ local custom = {
 			},
 		},
 	},
-	-- vim.lsp.config (vim.tbl_deep_extend) doesn't merge lists, so we do it here
+	-- NOTE vim.lsp.config (vim.tbl_deep_extend) doesn't merge lists, so we do it here
 	denols = {
 		filetypes = vim.tbl_extend("keep", { "json", "jsonc" }, vim.lsp.config.denols.filetypes),
 	},
@@ -1039,6 +1039,7 @@ vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	desc = "Mapping for init.lua",
+	group = vim.api.nvim_create_augroup("my_init", { clear = true }),
 	pattern = "init.lua",
 	callback = function()
 		vim.keymap.set("n", "<down>", "zj")
@@ -1047,9 +1048,41 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	once = true,
 })
 
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	desc = "Markdown",
+	pattern = "*.md",
+	group = vim.api.nvim_create_augroup("markdown", { clear = true }),
+	callback = function()
+		-- Enable spelling and wrap for window
+		vim.cmd("setlocal spell wrap")
+
+		-- Fold with tree-sitter
+		vim.cmd("setlocal foldmethod=expr foldexpr=v:lua.vim.treesitter.foldexpr()")
+
+		-- Set markdown-specific surrounding in 'mini.surround'
+		vim.b.minisurround_config = {
+			custom_surroundings = {
+				-- Markdown link. Common usage:
+				-- `saiwL` + [type/paste link] + <CR> - add link
+				-- `sdL` - delete link
+				-- `srLL` + [type/paste link] + <CR> - replace link
+				L = {
+					input = { "%[().-()%]%(.-%)" },
+					output = function()
+						local link = require("mini.surround").user_input("Link: ")
+						return { left = "[", right = "](" .. link .. ")" }
+					end,
+				},
+			},
+		}
+	end,
+	once = true,
+})
+
 vim.api.nvim_create_autocmd("LspAttach", {
 	desc = "Run after LSP attaches",
 	once = true,
+	group = vim.api.nvim_create_augroup("myLSP", { clear = true }),
 	callback = function()
 		vim.highlight.priorities.semantic_tokens = 95 -- just below Treesitter
 		vim.lsp.inlay_hint.enable()
@@ -1192,6 +1225,7 @@ vim.api.nvim_create_user_command("Commit", function()
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		desc = "Execute git commit",
 		pattern = "COMMIT_EDITMSG",
+		group = vim.api.nvim_create_augroup("gitcommit", nil),
 		once = true,
 		callback = function()
 			vim.fn.system("git commit -F " .. vim.fn.expand("%:p"))
