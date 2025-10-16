@@ -1,9 +1,9 @@
 -- vim: foldmarker={{{,}}} foldlevel=1 foldmethod=marker
 ---@diagnostic disable: missing-fields, param-type-mismatch, undefined-field
 
----{{{ Configs
+--- Configs {{{
 
--- {{{ Options
+-- Options {{{
 local o = vim.o
 
 -- o.foldlevel = 99
@@ -63,39 +63,6 @@ o.whichwrap = "<>[]hl,b,s"
 -- add binaries installed by mise
 vim.env.PATH = vim.env.PATH .. ":" .. vim.env.XDG_DATA_HOME .. "/mise/shims"
 
--- LSP and Diagnostics
-vim.highlight.priorities.semantic_tokens = 95 -- just below Treesitter
-vim.lsp.inlay_hint.enable()
-local x = vim.diagnostic.severity
-vim.diagnostic.config({
-	update_in_insert = false,
-	signs = { text = { [x.ERROR] = "󰅙", [x.WARN] = "", [x.INFO] = "󰋼", [x.HINT] = "󰌵" } },
-	virtual_text = { prefix = "", current_line = true, severity = { min = x.HINT } },
-	severity_sort = true,
-	underline = true,
-	float = { border = "rounded", header = "Diagnostics" },
-})
-
--- defer loading: `vim.diagnostic` - it's a relatively heavy module.
-vim.schedule(function()
-	vim.lsp.inlay_hint.enable()
-	vim.diagnostic.config({
-		update_in_insert = false,
-		signs = {
-			text = {
-				[vim.diagnostic.severity.ERROR] = "󰅙",
-				[vim.diagnostic.severity.WARN] = "",
-				[vim.diagnostic.severity.INFO] = "󰋼",
-				[vim.diagnostic.severity.HINT] = "󰌵",
-			},
-		},
-		virtual_text = { current_line = true, severity = { min = vim.diagnostic.severity.HINT } },
-		severity_sort = true,
-		underline = true,
-		float = { border = "rounded", header = "Diagnostics" },
-	})
-end)
-
 -- Create project-specific shada-files
 --
 o.shadafile = (function()
@@ -110,11 +77,25 @@ end)()
 
 -- }}} End Options
 
--- {{{ AutoCommands
+-- AutoCommands {{{
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	desc = "Mapping for init.lua",
+	pattern = "init.lua",
+	callback = function()
+		vim.keymap.set("n", "<down>", "zj")
+		vim.keymap.set("n", "<up>", "zk")
+	end,
+	once = true,
+})
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	desc = "Run after LSP attaches",
+	once = true,
 	callback = function()
+		vim.highlight.priorities.semantic_tokens = 95 -- just below Treesitter
+		vim.lsp.inlay_hint.enable()
+
 		-- Toggle LSP inline completions and notify of status
 		vim.keymap.set("n", "<leader>ac", function()
 			vim.lsp.inline_completion.enable(not vim.lsp.inline_completion.is_enabled())
@@ -123,6 +104,23 @@ vim.api.nvim_create_autocmd("LspAttach", {
 				vim.log.levels.INFO
 			)
 		end, { desc = "LSP: Toggle AI Completions" })
+
+		-- defer loading: `vim.diagnostic` - it's a relatively heavy module.
+		vim.diagnostic.config({
+			update_in_insert = false,
+			signs = {
+				text = {
+					[vim.diagnostic.severity.ERROR] = "󰅙",
+					[vim.diagnostic.severity.WARN] = "",
+					[vim.diagnostic.severity.INFO] = "󰋼",
+					[vim.diagnostic.severity.HINT] = "󰌵",
+				},
+			},
+			virtual_text = { current_line = true, severity = { min = vim.diagnostic.severity.HINT } },
+			severity_sort = true,
+			underline = true,
+			float = { border = "rounded", header = "Diagnostics" },
+		})
 	end,
 })
 
@@ -243,9 +241,9 @@ vim.api.nvim_create_user_command("Commit", function()
 	})
 end, {})
 vim.keymap.set("n", "ghc", vim.cmd.Commit, { desc = "Git Commit" })
--- }}} End: AutoCommands
+-- }}}
 
--- {{{ Neovim Mappings
+-- KeyMaps {{{
 vim.keymap.set("i", "<C-s>", "<cmd>w<cr>", { desc = "Join w/o cursor moving" })
 vim.keymap.set("i", "jk", "<ESC>", { desc = "Escape insert mode" })
 vim.keymap.set("n", "<leader>rr", ":update<CR> :source<CR>", { desc = "Source current file" })
@@ -319,7 +317,7 @@ vim.keymap.set("t", "<C-j>", navigate_from_terminal("j"))
 vim.keymap.set("t", "<C-k>", navigate_from_terminal("k"))
 vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 
--- }}} End Mappings
+-- }}}
 
 -- }}} End: Configs
 
