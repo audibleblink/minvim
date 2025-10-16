@@ -539,28 +539,22 @@ require("nvim-tmux-navigation").setup({
 require("render-markdown").setup({
 	completions = { lsp = { enabled = true } },
 	render_modes = true, -- Render in ALL modes
+
+	heading = {
+		backgrounds = {
+			"RenderMarkdownH5Bg",
+			"RenderMarkdownH4Bg",
+			"RenderMarkdownH3Bg",
+			"RenderMarkdownH2Bg",
+			"RenderMarkdownH1Bg",
+			"RenderMarkdownH6Bg",
+		},
+		border = true,
+	},
 	sign = {
-		enabled = false, -- Turn off in the status column
+		enabled = false, -- Turn off in the status column },
 	},
 	latex = { enabled = false },
-	overrides = {
-		filetype = {
-			codecompanion = {
-				html = {
-					tag = {
-						buf = { icon = " ", highlight = "CodeCompanionChatIcon" },
-						file = { icon = " ", highlight = "CodeCompanionChatIcon" },
-						group = { icon = " ", highlight = "CodeCompanionChatIcon" },
-						help = { icon = "󰘥 ", highlight = "CodeCompanionChatIcon" },
-						image = { icon = " ", highlight = "CodeCompanionChatIcon" },
-						symbols = { icon = " ", highlight = "CodeCompanionChatIcon" },
-						tool = { icon = "󰯠 ", highlight = "CodeCompanionChatIcon" },
-						url = { icon = "󰌹 ", highlight = "CodeCompanionChatIcon" },
-					},
-				},
-			},
-		},
-	},
 })
 --- }}}
 
