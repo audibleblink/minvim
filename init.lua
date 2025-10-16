@@ -55,9 +55,9 @@ require("auto-dark-mode").setup({
 
 -- blink.cmp {{{
 require("blink.cmp").setup({
-	signature = { enabled = true },
-	snippets = {
-		preset = "mini_snippets",
+	cmdline = {
+		keymap = { preset = "inherit" },
+		completion = { menu = { auto_show = true } },
 	},
 	completion = {
 		documentation = {
@@ -108,6 +108,10 @@ require("blink.cmp").setup({
 				return vim.lsp.inline_completion.select()
 			end,
 		},
+	},
+	signature = { enabled = true },
+	snippets = {
+		preset = "mini_snippets",
 	},
 })
 -- }}}
