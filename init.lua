@@ -22,6 +22,7 @@ vim.pack.add({
 	{ src = "https://github.com/folke/sidekick.nvim" },
 	{ src = "https://github.com/folke/trouble.nvim" },
 	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
+	{ src = "https://github.com/linrongbin16/lsp-progress.nvim" },
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
@@ -295,6 +296,19 @@ require("lazydev").setup({
 
 --- lualine.nvim {{{
 --
+
+require("lsp-progress").setup({
+	client_format = function(_, _, series_messages)
+		return #series_messages > 0 and (table.concat(series_messages, ", ")) or nil
+	end,
+	format = function(client_messages)
+		if #client_messages > 0 then
+			return table.concat(client_messages, " ")
+		end
+		return ""
+	end,
+})
+
 require("lualine").setup({
 	options = {
 		icons_enabled = true,
@@ -336,6 +350,9 @@ require("lualine").setup({
 				icon = " ",
 				ignore_lsp = { "copilot", "stylua" },
 			},
+			function()
+				return require("lsp-progress").progress()
+			end,
 		},
 		lualine_y = { "branch" },
 		lualine_z = { { "location", separator = { right = "" }, left_padding = 2 } },
@@ -486,7 +503,7 @@ require("noice").setup({
 	lsp = {
 		signature = { enabled = false },
 		hover = { enabled = false },
-		progress = { enabled = true },
+		progress = { enabled = false },
 	},
 	views = {
 		cmdline_popup = {
@@ -1036,7 +1053,19 @@ vim.keymap.set("t", "<C-l>", navigate_from_terminal("l"))
 --- }}}
 
 --- AutoCommands {{{
+-- listen lsp-progress event and refresh lualine
+--
+vim.api.nvim_create_autocmd("User", {
+	group = vim.api.nvim_create_augroup("lualine_augroup", { clear = true }),
+	pattern = "LspProgressStatusUpdated",
+	callback = function()
+		require("lualine").refresh()
+	end,
+})
 
+--- Add fold navigation mappings for init.lua
+--- Maps arrow keys to navigate between folds (zj/zk)
+--
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	desc = "Mapping for init.lua",
 	group = vim.api.nvim_create_augroup("my_init", { clear = true }),
@@ -1048,6 +1077,8 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	once = true,
 })
 
+--- Configure markdown files with spell check, wrapping, folding, and link surround
+--
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	desc = "Markdown",
 	pattern = "*.md",
@@ -1079,6 +1110,9 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 	once = true,
 })
 
+--- Configure LSP settings when LSP attaches to buffer
+--- Sets semantic token priority, enables inlay hints, configures diagnostics display
+--
 vim.api.nvim_create_autocmd("LspAttach", {
 	desc = "Run after LSP attaches",
 	once = true,
@@ -1115,6 +1149,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
+--- Creates User command to install all Mason packages
+--
 vim.api.nvim_create_user_command("MasonInstallAll", function()
 	local mason_packages = {}
 	vim.list_extend(mason_packages, _G.debuggers)
@@ -1176,7 +1212,8 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave" }, {
 	end,
 })
 
---- More specific autocmd that only triggers on window focus
+--- Mimic harpoon, but with the quickfix window
+--- Maps: qc to close, 1-4 to jump to item and close, dd to delete item from list
 --
 vim.api.nvim_create_autocmd("BufWinEnter", {
 	desc = "Set up quickfix window keybindings",
@@ -1215,6 +1252,7 @@ vim.api.nvim_create_autocmd("WinEnter", {
 })
 
 --- Git commit within current session
+--- Opens COMMIT_EDITMSG in a new tab and commits on save
 --
 vim.api.nvim_create_user_command("Commit", function()
 	-- This causes git to create COMMIT_EDITMSG but not complete the commit
@@ -1222,6 +1260,8 @@ vim.api.nvim_create_user_command("Commit", function()
 	local git_dir = vim.fn.system("git rev-parse --git-dir"):gsub("\n", "")
 	vim.cmd("tabedit! " .. git_dir .. "/COMMIT_EDITMSG")
 
+	--- Autocmd to complete the git commit when the message file is saved
+	--
 	vim.api.nvim_create_autocmd("BufWritePost", {
 		desc = "Execute git commit",
 		pattern = "COMMIT_EDITMSG",
